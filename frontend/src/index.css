@@ -1,0 +1,430 @@
+/* 한글 폰트 최적화 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* 기본 폰트 크기 설정 */
+  html {
+    font-size: 16px;
+  }
+  
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+    
+    /* 금융 데이터 전용 색상 */
+    --profit: 142.1 76.2% 36.3%;        /* 수익 (녹색) */
+    --profit-light: 142.1 70.6% 45.3%;
+    --profit-dark: 142.1 82% 28%;
+    
+    --loss: 0 84.2% 60.2%;              /* 손실 (빨강) */
+    --loss-light: 0 72.2% 70%;
+    --loss-dark: 0 92% 50%;
+    
+    --neutral: 215 20.2% 65.1%;         /* 중립 (회색) */
+    --warning: 38.7 92% 50%;            /* 경고 (주황) */
+    
+    /* 그라데이션 색상 변수 */
+    --gradient-primary-from: 221.2 83.2% 53.3%;
+    --gradient-primary-to: 217.2 91.2% 59.8%;
+    --gradient-success-from: 142.1 76.2% 36.3%;
+    --gradient-success-to: 142.1 70.6% 45.3%;
+    --gradient-danger-from: 0 84.2% 60.2%;
+    --gradient-danger-to: 0 72.2% 50.2%;
+    --gradient-info-from: 199.1 89.1% 48.2%;
+    --gradient-info-to: 199.1 89.1% 58.2%;
+    --gradient-warning-from: 38.7 92% 50%;
+    --gradient-warning-to: 38.7 92% 60%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 70%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+    
+    /* 금융 데이터 전용 색상 (다크모드) */
+    --profit: 142.1 70.6% 45.3%;
+    --profit-light: 142.1 76.2% 55%;
+    --profit-dark: 142.1 82% 38%;
+    
+    --loss: 0 72.2% 50.2%;
+    --loss-light: 0 84.2% 60%;
+    --loss-dark: 0 92% 45%;
+    
+    --neutral: 215 20.2% 70%;
+    
+    /* 다크모드 그라데이션 색상 변수 */
+    --gradient-primary-from: 217.2 91.2% 59.8%;
+    --gradient-primary-to: 221.2 83.2% 63.3%;
+    --gradient-success-from: 142.1 70.6% 45.3%;
+    --gradient-success-to: 142.1 76.2% 50.3%;
+    --gradient-danger-from: 0 72.2% 50.2%;
+    --gradient-danger-to: 0 84.2% 60.2%;
+    --gradient-info-from: 199.1 89.1% 58.2%;
+    --gradient-info-to: 199.1 89.1% 68.2%;
+    --gradient-warning-from: 38.7 92% 60%;
+    --gradient-warning-to: 38.7 92% 70%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  
+  /* 타이포그래피 스케일 */
+  .text-display {
+    @apply text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight;
+  }
+  
+  .text-headline {
+    @apply text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight;
+  }
+  
+  .text-title {
+    @apply text-xl sm:text-2xl lg:text-3xl font-semibold;
+  }
+  
+  .text-body-lg {
+    @apply text-base sm:text-lg leading-relaxed;
+  }
+  
+  .text-body {
+    @apply text-sm sm:text-base leading-normal;
+  }
+  
+  .text-body-sm {
+    @apply text-xs sm:text-sm leading-normal;
+  }
+  
+  .text-caption {
+    @apply text-xs leading-tight;
+  }
+  
+  /* 숫자 전용 폰트 (금융 데이터에 최적) */
+  .font-numeric {
+    font-family: 'Inter', 'Roboto', system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+  
+  /* select 요소 전역 스타일 */
+  select {
+    @apply bg-background;
+  }
+  
+  /* 포커스 스타일 개선 (버튼과 인터랙티브 요소에만 적용) */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2;
+  }
+}
+
+@layer utilities {
+  /* 금융 데이터 표시용 유틸리티 */
+  .text-profit {
+    color: hsl(var(--profit));
+  }
+  
+  .text-profit-light {
+    color: hsl(var(--profit-light));
+  }
+  
+  .text-loss {
+    color: hsl(var(--loss));
+  }
+  
+  .text-loss-light {
+    color: hsl(var(--loss-light));
+  }
+  
+  .text-neutral {
+    color: hsl(var(--neutral));
+  }
+  
+  .bg-profit {
+    background-color: hsl(var(--profit));
+  }
+  
+  .bg-loss {
+    background-color: hsl(var(--loss));
+  }
+  
+  /* 숫자 표시 유틸리티 */
+  .number-positive {
+    @apply text-profit font-semibold font-numeric;
+  }
+  
+  .number-negative {
+    @apply text-loss font-semibold font-numeric;
+  }
+  
+  .number-neutral {
+    @apply text-neutral font-numeric;
+  }
+  
+  /* 스크롤바 숨기기 (스크롤 기능은 유지) */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari, Opera */
+  }
+  
+  /* 그라데이션 유틸리티 */
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--gradient-primary-from)), hsl(var(--gradient-primary-to)));
+  }
+  
+  .gradient-success {
+    background: linear-gradient(135deg, hsl(var(--gradient-success-from)), hsl(var(--gradient-success-to)));
+  }
+  
+  .gradient-danger {
+    background: linear-gradient(135deg, hsl(var(--gradient-danger-from)), hsl(var(--gradient-danger-to)));
+  }
+  
+  .gradient-info {
+    background: linear-gradient(135deg, hsl(var(--gradient-info-from)), hsl(var(--gradient-info-to)));
+  }
+  
+  .gradient-warning {
+    background: linear-gradient(135deg, hsl(var(--gradient-warning-from)), hsl(var(--gradient-warning-to)));
+  }
+  
+  /* 텍스트 그라데이션 */
+  .text-gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--gradient-primary-from)), hsl(var(--gradient-primary-to)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .text-gradient-success {
+    background: linear-gradient(135deg, hsl(var(--gradient-success-from)), hsl(var(--gradient-success-to)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* 향상된 그림자 */
+  .shadow-elevation-1 {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  }
+  
+  .shadow-elevation-2 {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  .shadow-elevation-3 {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  
+  .shadow-elevation-4 {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  
+  .shadow-elevation-5 {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  
+  .dark .shadow-elevation-1 {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  }
+  
+  .dark .shadow-elevation-2 {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  }
+  
+  .dark .shadow-elevation-3 {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  }
+  
+  .dark .shadow-elevation-4 {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  }
+  
+  .dark .shadow-elevation-5 {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* 애니메이션 */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slide-up {
+    from {
+      transform: translateY(10px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slide-down {
+    from {
+      transform: translateY(-10px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes scale-in {
+    from {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+  
+  @keyframes pulse-glow {
+    0%, 100% {
+      opacity: 1;
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+    }
+    50% {
+      opacity: 0.8;
+      box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
+    }
+  }
+  
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+  
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+  }
+  
+  .animate-slide-down {
+    animation: slide-down 0.3s ease-out;
+  }
+  
+  .animate-scale-in {
+    animation: scale-in 0.2s ease-out;
+  }
+  
+  .animate-shimmer {
+    animation: shimmer 2s infinite linear;
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      rgba(255, 255, 255, 0.1) 50%,
+      transparent 100%
+    );
+    background-size: 1000px 100%;
+  }
+  
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  
+  /* 호버 효과 */
+  .hover-lift {
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  
+  .dark .hover-lift:hover {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  }
+  
+  .hover-glow {
+    transition: box-shadow 0.3s ease-out;
+  }
+  
+  .hover-glow:hover {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+  }
+  
+  /* 부드러운 전환 */
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .transition-bounce {
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+}
+
+
+
+
+
+
+
+

@@ -1,0 +1,46 @@
+# Database
+*.db
+*.sqlite
+*.db-shm
+*.db-wal
+data/
+
+# Environment
+.env
+
+# Logs
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Node
+node_modules/
+dist/
+build/
+.npm
+.pnpm-debug.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+
+
+
+
+
+
+
