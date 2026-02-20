@@ -1,10 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
-import { dashboardApi, backgroundApi } from '@/services/api';
+import { dashboardApi, backgroundApi, positionsApi } from '@/services/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DashboardSkeleton } from '@/components/ui/skeleton';
 import { formatCurrency, formatPercent } from '@/lib/utils';
-import { TrendingUp, TrendingDown, DollarSign, Wallet, RefreshCw, Clock, Activity } from 'lucide-react';
+import {
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  Wallet,
+  RefreshCw,
+  Clock,
+  Activity,
+  BarChart2,
+} from 'lucide-react';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useToast } from '@/hooks/useToast';
 import PortfolioChart from './PortfolioChart';
@@ -38,22 +47,32 @@ export default function Dashboard({ accountId }: DashboardProps) {
           include_account_summaries: accountId === null,
         })
         .then((res) => res.data),
-    refetchInterval: 60000, // 1분마다 자동 갱신
-    retry: 3, // 3번 재시도
-    retryDelay: 1000, // 1초 후 재시도
+    refetchInterval: 60000,
+    retry: 3,
+    retryDelay: 1000,
+  });
+
+  // 포지션 데이터 (상위 포지션 테이블용)
+  const { data: positions } = useQuery({
+    queryKey: ['positions-dashboard', accountId],
+    queryFn: () =>
+      positionsApi
+        .getAll({ account_id: accountId || undefined, include_closed: false })
+        .then((res) => res.data),
+    refetchInterval: 60000,
+    retry: 2,
   });
 
   // 백그라운드 로딩 상태 조회
   const { data: bgStatus } = useQuery({
     queryKey: ['background-loading-status'],
     queryFn: () => backgroundApi.getPriceLoadingStatus().then((res) => res.data),
-    refetchInterval: 2000, // 2초마다 상태 확인
+    refetchInterval: 2000,
   });
 
   useEffect(() => {
     if (bgStatus) {
       setLoadingStatus(bgStatus);
-      // 로딩 중이면 프로그레스 바 표시
       setShowProgress(bgStatus.completed < bgStatus.total && bgStatus.total > 0);
     }
   }, [bgStatus]);
@@ -61,80 +80,40 @@ export default function Dashboard({ accountId }: DashboardProps) {
   const handleForceRefresh = useCallback(async () => {
     try {
       await backgroundApi.forceRefresh();
-      // 잠시 후 대시보드 새로고침
       setTimeout(() => {
         refetch();
       }, 1000);
     } catch (error) {
       console.error('Failed to force refresh:', error);
       toast({
-        title: "새로고침 실패",
-        description: error instanceof Error ? error.message : "새로고침 중 오류가 발생했습니다.",
-        variant: "destructive",
+        title: '새로고침 실패',
+        description: error instanceof Error ? error.message : '새로고침 중 오류가 발생했습니다.',
+        variant: 'destructive',
       });
     }
   }, [refetch, toast]);
 
-  // 카드 데이터 메모이제이션 - Hooks 규칙을 지키기 위해 조건부 return 이전에 선언
-  const cards = useMemo(() => [
-    {
-      title: '총 평가금액',
-      valueUSD: summary?.total_market_value_usd || 0,
-      valueKRW: summary?.total_market_value_krw || 0,
-      icon: Wallet,
-      color: 'text-blue-600',
-      gradient: 'gradient-info',
-      iconGradient: 'from-blue-500 to-blue-700',
-    },
-    {
-      title: '미실현 손익',
-      valueUSD: summary?.total_unrealized_pl_usd || 0,
-      valueKRW: summary?.total_unrealized_pl_krw || 0,
-      icon: (summary?.total_unrealized_pl_usd || 0) >= 0 ? TrendingUp : TrendingDown,
-      color:
-        (summary?.total_unrealized_pl_usd || 0) >= 0
-          ? 'text-green-600'
-          : 'text-red-600',
-      gradient: (summary?.total_unrealized_pl_usd || 0) >= 0 ? 'gradient-success' : 'gradient-danger',
-      iconGradient: (summary?.total_unrealized_pl_usd || 0) >= 0 ? 'from-green-500 to-green-700' : 'from-red-500 to-red-700',
-    },
-    {
-      title: '실현 손익',
-      valueUSD: summary?.total_realized_pl_usd || 0,
-      valueKRW: summary?.total_realized_pl_krw || 0,
-      icon: (summary?.total_realized_pl_usd || 0) >= 0 ? TrendingUp : TrendingDown,
-      color:
-        (summary?.total_realized_pl_usd || 0) >= 0 ? 'text-green-600' : 'text-red-600',
-      gradient: (summary?.total_realized_pl_usd || 0) >= 0 ? 'gradient-success' : 'gradient-danger',
-      iconGradient: (summary?.total_realized_pl_usd || 0) >= 0 ? 'from-green-500 to-green-700' : 'from-red-500 to-red-700',
-    },
-    {
-      title: '총 손익',
-      valueUSD: summary?.total_pl_usd || 0,
-      valueKRW: summary?.total_pl_krw || 0,
-      dayChange: summary?.day_change_pl_usd,
-      icon: (summary?.total_pl_usd || 0) >= 0 ? TrendingUp : TrendingDown,
-      color: (summary?.total_pl_usd || 0) >= 0 ? 'text-green-600' : 'text-red-600',
-      gradient: (summary?.total_pl_usd || 0) >= 0 ? 'gradient-success' : 'gradient-danger',
-      iconGradient: (summary?.total_pl_usd || 0) >= 0 ? 'from-green-500 to-green-700' : 'from-red-500 to-red-700',
-    },
-    {
-      title: '총 배당금',
-      valueUSD: summary?.total_dividends_usd || 0,
-      valueKRW: summary?.total_dividends_krw || 0,
-      icon: DollarSign,
-      color: 'text-green-600',
-      gradient: 'gradient-success',
-      iconGradient: 'from-green-500 to-green-700',
-    },
-  ], [summary]);
+  // 상위 포지션 (market_value_usd 기준 상위 8개)
+  const topPositions = useMemo(() => {
+    if (!positions) return [];
+    return [...positions]
+      .filter((p) => !p.is_closed && (p.market_value_usd ?? 0) > 0)
+      .sort((a, b) => (b.market_value_usd ?? 0) - (a.market_value_usd ?? 0))
+      .slice(0, 8);
+  }, [positions]);
 
-  // 로딩 상태에 따른 UI 렌더링
+  // 포트폴리오 전체 시장가 (비중 계산용)
+  const totalMarketValue = useMemo(() => {
+    if (!positions) return 0;
+    return positions
+      .filter((p) => !p.is_closed)
+      .reduce((sum, p) => sum + (p.market_value_usd ?? 0), 0);
+  }, [positions]);
+
   if (isLoading && !summary) {
     return <DashboardSkeleton />;
   }
 
-  // 에러 상태 처리
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center p-8 space-y-4">
@@ -152,7 +131,6 @@ export default function Dashboard({ accountId }: DashboardProps) {
     );
   }
 
-  // summary가 없으면 로딩 상태 표시
   if (!summary) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -162,461 +140,384 @@ export default function Dashboard({ accountId }: DashboardProps) {
     );
   }
 
+  const unrealizedPL = summary.total_unrealized_pl_usd ?? 0;
+  const realizedPL = summary.total_realized_pl_usd ?? 0;
+  const totalPL = summary.total_pl_usd ?? 0;
+  const dayChange = summary.day_change_pl_usd;
+  const netInvestment = summary.net_investment_usd ?? 0;
+  const totalAssets = netInvestment + realizedPL + unrealizedPL;
+  const netInvestmentWidth = totalAssets > 0 ? (Math.abs(netInvestment) / totalAssets) * 100 : 0;
+  const realizedPLWidth = totalAssets > 0 ? (Math.abs(realizedPL) / totalAssets) * 100 : 0;
+  const unrealizedPLWidth = totalAssets > 0 ? (Math.abs(unrealizedPL) / totalAssets) * 100 : 0;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
+      {/* 헤더 행 */}
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">
-          대시보드{accountId !== null && ' - 계정별 보기'}
+        <h2 className="text-2xl font-bold tracking-tight">
+          대시보드{accountId !== null && ' — 계정별 보기'}
         </h2>
         <div className="flex items-center gap-2">
-          <Button
-            onClick={handleForceRefresh}
-            variant="outline"
-            size="sm"
-            className="hover-lift"
-          >
+          <Button onClick={handleForceRefresh} variant="outline" size="sm" className="hover-lift">
             <RefreshCw className="h-4 w-4 mr-2" />
             새로고침
           </Button>
-          
-          <div className="flex items-center gap-2">
-            {/* 환율 배지 */}
-            <div 
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800 rounded-lg text-xs font-medium shadow-sm hover-lift"
-              title={`환율: ${formatCurrency(summary.fx_rate_usd_krw ?? 1350, 'KRW')}/USD (기준일: ${summary.fx_rate_as_of ?? '-'})`}
-            >
-              <DollarSign className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-              <span className="text-blue-700 dark:text-blue-300">{Math.round(summary.fx_rate_usd_krw ?? 1350).toLocaleString()}</span>
-            </div>
-            
-            {/* Fear & Greed 배지 */}
-            {summary.fear_greed_index && (
-              <div 
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover-lift border ${
-                  summary.fear_greed_index.value <= 25
-                    ? 'bg-gradient-to-r from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30 text-red-700 dark:text-red-400 border-red-300 dark:border-red-800'
-                    : summary.fear_greed_index.value <= 45
-                    ? 'bg-gradient-to-r from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 text-orange-700 dark:text-orange-400 border-orange-300 dark:border-orange-800'
-                    : summary.fear_greed_index.value <= 55
-                    ? 'bg-gradient-to-r from-yellow-100 to-yellow-200 dark:from-yellow-900/30 dark:to-yellow-800/30 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-800'
-                    : summary.fear_greed_index.value <= 75
-                    ? 'bg-gradient-to-r from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30 text-green-700 dark:text-green-400 border-green-300 dark:border-green-800'
-                    : 'bg-gradient-to-r from-emerald-100 to-emerald-200 dark:from-emerald-900/30 dark:to-emerald-800/30 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800'
-                }`}
-                title={`Fear & Greed Index: ${summary.fear_greed_index.value} (${summary.fear_greed_index.classification}) - 기준일: ${new Date(summary.fear_greed_index.as_of).toLocaleDateString('ko-KR')}`}
-              >
-                <Activity className="h-3.5 w-3.5" />
-                <span>{summary.fear_greed_index.value}</span>
-              </div>
-            )}
+          {/* 환율 배지 */}
+          <div
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800 rounded-lg text-xs font-medium shadow-sm"
+            title={`환율: ${formatCurrency(summary.fx_rate_usd_krw ?? 1350, 'KRW')}/USD (기준일: ${summary.fx_rate_as_of ?? '-'})`}
+          >
+            <DollarSign className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+            <span className="text-blue-700 dark:text-blue-300 font-numeric">
+              {Math.round(summary.fx_rate_usd_krw ?? 1350).toLocaleString()}
+            </span>
           </div>
+          {/* Fear & Greed 배지 */}
+          {summary.fear_greed_index && (
+            <div
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm border ${
+                summary.fear_greed_index.value <= 25
+                  ? 'bg-gradient-to-r from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30 text-red-700 dark:text-red-400 border-red-300 dark:border-red-800'
+                  : summary.fear_greed_index.value <= 45
+                  ? 'bg-gradient-to-r from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 text-orange-700 dark:text-orange-400 border-orange-300 dark:border-orange-800'
+                  : summary.fear_greed_index.value <= 55
+                  ? 'bg-gradient-to-r from-yellow-100 to-yellow-200 dark:from-yellow-900/30 dark:to-yellow-800/30 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-800'
+                  : summary.fear_greed_index.value <= 75
+                  ? 'bg-gradient-to-r from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30 text-green-700 dark:text-green-400 border-green-300 dark:border-green-800'
+                  : 'bg-gradient-to-r from-emerald-100 to-emerald-200 dark:from-emerald-900/30 dark:to-emerald-800/30 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800'
+              }`}
+              title={`Fear & Greed Index: ${summary.fear_greed_index.value} (${summary.fear_greed_index.classification}) — 기준일: ${new Date(summary.fear_greed_index.as_of).toLocaleDateString('ko-KR')}`}
+            >
+              <Activity className="h-3.5 w-3.5" />
+              <span className="font-numeric">{summary.fear_greed_index.value}</span>
+              <span className="hidden sm:inline opacity-75">
+                {summary.fear_greed_index.value <= 25
+                  ? '극단적 공포'
+                  : summary.fear_greed_index.value <= 45
+                  ? '공포'
+                  : summary.fear_greed_index.value <= 55
+                  ? '중립'
+                  : summary.fear_greed_index.value <= 75
+                  ? '탐욕'
+                  : '극단적 탐욕'}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* 백그라운드 로딩 상태 표시 */}
+      {/* 백그라운드 로딩 상태 */}
       {showProgress && loadingStatus && (
-        <Card className="border-blue-200 bg-blue-50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-blue-800">
-              <Clock className="h-5 w-5" />
-              주가 데이터 업데이트 중
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>진행률: {loadingStatus.completed}/{loadingStatus.total}</span>
-                <span>{loadingStatus.progress_percent?.toFixed(1)}%</span>
-              </div>
-              <div className="w-full bg-blue-200 rounded-full h-2">
-                <div 
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${loadingStatus.progress_percent || 0}%` }}
-                />
+        <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/30">
+          <CardContent className="py-3 px-4">
+            <div className="flex items-center gap-3">
+              <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0 animate-pulse" />
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between text-xs text-blue-700 dark:text-blue-300 mb-1">
+                  <span>주가 업데이트 중{loadingStatus.current_ticker && ` — ${loadingStatus.current_ticker}`}</span>
+                  <span className="font-numeric">{loadingStatus.completed}/{loadingStatus.total} ({loadingStatus.progress_percent?.toFixed(0)}%)</span>
+                </div>
+                <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-1.5">
+                  <div
+                    className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
+                    style={{ width: `${loadingStatus.progress_percent || 0}%` }}
+                  />
+                </div>
               </div>
             </div>
-            
-            {loadingStatus.current_ticker && (
-              <div className="text-sm text-blue-700">
-                현재 업데이트 중: <span className="font-mono font-semibold">{loadingStatus.current_ticker}</span>
-              </div>
-            )}
-            
-            {loadingStatus.estimated_remaining_seconds && (
-              <div className="text-sm text-blue-600">
-                예상 남은 시간: 약 {Math.ceil(loadingStatus.estimated_remaining_seconds / 60)}분
-              </div>
-            )}
           </CardContent>
         </Card>
       )}
 
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        {cards.map((card, index) => (
-          <Card 
-            key={index} 
-            className="min-h-[140px] sm:min-h-[120px] hover-lift relative overflow-hidden group animate-fade-in"
-            style={{ animationDelay: `${index * 0.1}s` }}
-          >
-            {/* 그라데이션 배경 오버레이 */}
-            <div className={`absolute inset-0 ${card.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
-            
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-              <CardTitle className="text-sm font-medium">
-                {card.title}
-              </CardTitle>
-              <div className={`bg-gradient-to-br ${card.iconGradient} p-1.5 rounded-lg shadow-sm`}>
-                <card.icon className="h-4 w-4 text-white" />
-              </div>
-            </CardHeader>
-            <CardContent className="relative z-10">
-              <div className="text-2xl sm:text-3xl font-bold tracking-tight font-numeric">
-                {formatCurrency(card.valueUSD, 'USD')}
-              </div>
-              <div className="text-xs text-muted-foreground mt-1.5 font-numeric">
-                {formatCurrency(card.valueKRW, 'KRW')}
-              </div>
-              {card.dayChange !== undefined && card.dayChange !== null && (
-                <div
-                  className={`text-xs mt-2 font-semibold flex items-center gap-1 font-numeric ${
-                    card.dayChange >= 0 ? 'text-profit' : 'text-loss'
-                  }`}
-                >
-                  {card.dayChange >= 0 ? (
-                    <TrendingUp className="h-3 w-3" aria-hidden="true" />
-                  ) : (
-                    <TrendingDown className="h-3 w-3" aria-hidden="true" />
-                  )}
-                  <span>
-                    전일대비: {card.dayChange >= 0 ? '+' : ''}{formatCurrency(card.dayChange, 'USD')}
-                  </span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* 포트폴리오 구성 바 차트 - 누적 투자 성과 기준 */}
-      {(() => {
-        const netInvestment = summary.net_investment_usd || 0; // 순투자금액
-        const realizedPL = summary.total_realized_pl_usd || 0; // 실현손익
-        const unrealizedPL = summary.total_unrealized_pl_usd || 0; // 미실현손익
-        const totalAssets = netInvestment + realizedPL + unrealizedPL; // 총자산
-        
-        if (totalAssets <= 0) return null;
-        
-        // 각 세그먼트 너비 계산 (비율 기반, 음수는 절댓값으로 처리)
-        const netInvestmentWidth = totalAssets > 0 ? (Math.abs(netInvestment) / totalAssets) * 100 : 0;
-        const realizedPLWidth = totalAssets > 0 ? (Math.abs(realizedPL) / totalAssets) * 100 : 0;
-        const unrealizedPLWidth = totalAssets > 0 ? (Math.abs(unrealizedPL) / totalAssets) * 100 : 0;
-        
-        // 세그먼트 위치 계산 (라벨 배치용)
-        let netInvestmentLeft = 0;
-        let realizedPLLeft = netInvestmentWidth;
-        let unrealizedPLLeft = netInvestmentWidth + realizedPLWidth;
-        
-        // 반응형 라벨 표시 여부 결정 함수
-        const shouldShowLabel = (width: number) => width > 8;
-        const shouldShowAmount = (width: number) => width > 15;
-        const shouldShowCompactLabel = (width: number) => width > 3; // 매우 작은 세그먼트용
-        
-        return (
-          <div className="mb-6">
-            <div className="relative w-full">
-              {/* 바 차트 - 전체 너비 활용 */}
-              <div className="flex h-16 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                {/* 순투자금액 세그먼트 */}
-                {netInvestment !== 0 && (
-                  <div
-                    className="flex items-center justify-center bg-gradient-to-r from-gray-500 to-gray-600 text-white font-semibold text-xs sm:text-sm transition-all duration-200 hover:brightness-110 cursor-pointer relative group border-r border-gray-400/40 dark:border-gray-300/20 rounded-l-lg"
-                    style={{
-                      width: `${Math.max(netInvestmentWidth, 1)}%`, // 최소 1% 너비 보장
-                      minWidth: '8px', // 최소 8px 너비 보장
-                    }}
-                    title={`순투자금액: ${formatCurrency(netInvestment, 'USD')} (입금: ${formatCurrency(summary.total_deposits_usd || 0, 'USD')} - 출금: ${formatCurrency(summary.total_withdrawals_usd || 0, 'USD')})`}
-                  >
-                    {shouldShowLabel(netInvestmentWidth) ? (
-                      <span className="px-2 truncate text-center">
-                        {shouldShowAmount(netInvestmentWidth) ? (
-                          <>
-                            <div className="font-bold">순투자금액</div>
-                            <div className="text-[10px] opacity-90">{formatCurrency(netInvestment, 'USD')}</div>
-                          </>
-                        ) : (
-                          <span>순투자금액</span>
-                        )}
-                      </span>
-                    ) : shouldShowCompactLabel(netInvestmentWidth) ? (
-                      <span className="text-xs font-bold">투자</span>
-                    ) : (
-                      <div className="w-1 h-1 bg-white rounded-full opacity-80" />
-                    )}
-                    
-                    {/* 작은 세그먼트용 외부 라벨 */}
-                    {netInvestmentWidth < 8 && netInvestmentWidth > 0.1 && (
-                      <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-600 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 pointer-events-none">
-                        순투자금액: {formatCurrency(netInvestment, 'USD')}
-                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-600" />
-                      </div>
-                    )}
-                  </div>
-                )}
-                
-                {/* 실현손익 세그먼트 */}
-                {realizedPL !== 0 && (
-                  <div
-                    className={`flex items-center justify-center font-semibold text-xs sm:text-sm transition-all duration-200 hover:brightness-110 cursor-pointer relative group border-r ${
-                      realizedPL >= 0
-                        ? 'bg-gradient-to-r from-green-600 to-green-700 text-white border-green-500/40 dark:border-green-400/20'
-                        : 'bg-gradient-to-r from-red-600 to-red-700 text-white border-red-500/40 dark:border-red-400/20'
-                    } ${netInvestment === 0 ? 'rounded-l-lg' : ''}`}
-                    style={{
-                      width: `${Math.max(realizedPLWidth, 1)}%`, // 최소 1% 너비 보장
-                      minWidth: '8px', // 최소 8px 너비 보장
-                    }}
-                    title={`실현손익: ${formatCurrency(realizedPL, 'USD')}`}
-                  >
-                    {shouldShowLabel(realizedPLWidth) ? (
-                      <span className="px-2 truncate text-center">
-                        {shouldShowAmount(realizedPLWidth) ? (
-                          <>
-                            <div className="font-bold">실현손익</div>
-                            <div className="text-[10px] opacity-90">{formatCurrency(realizedPL, 'USD')}</div>
-                          </>
-                        ) : (
-                          <span>실현손익</span>
-                        )}
-                      </span>
-                    ) : shouldShowCompactLabel(realizedPLWidth) ? (
-                      <span className="text-xs font-bold">{realizedPL >= 0 ? '실+' : '실-'}</span>
-                    ) : (
-                      <div className="w-1 h-1 bg-white rounded-full opacity-80" />
-                    )}
-                    
-                    {/* 작은 세그먼트용 외부 라벨 */}
-                    {realizedPLWidth < 8 && realizedPLWidth > 0.1 && (
-                      <div className={`absolute -top-8 left-1/2 transform -translate-x-1/2 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 pointer-events-none ${
-                        realizedPL >= 0 ? 'bg-green-600' : 'bg-red-600'
-                      }`}>
-                        실현손익: {formatCurrency(realizedPL, 'USD')}
-                        <div className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent ${
-                          realizedPL >= 0 ? 'border-t-green-600' : 'border-t-red-600'
-                        }`} />
-                      </div>
-                    )}
-                  </div>
-                )}
-                
-                {/* 미실현손익 세그먼트 */}
-                {unrealizedPL !== 0 && (
-                  <div
-                    className={`flex items-center justify-center font-semibold text-xs sm:text-sm transition-all duration-200 hover:brightness-110 cursor-pointer relative group rounded-r-lg ${
-                      unrealizedPL >= 0
-                        ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white'
-                        : 'bg-gradient-to-r from-rose-500 to-rose-600 text-white'
-                    }`}
-                    style={{
-                      width: `${Math.max(unrealizedPLWidth, 1)}%`, // 최소 1% 너비 보장
-                      minWidth: '8px', // 최소 8px 너비 보장
-                    }}
-                    title={`미실현손익: ${formatCurrency(unrealizedPL, 'USD')}`}
-                  >
-                    {shouldShowLabel(unrealizedPLWidth) ? (
-                      <span className="px-2 truncate text-center">
-                        {shouldShowAmount(unrealizedPLWidth) ? (
-                          <>
-                            <div className="font-bold">미실현손익</div>
-                            <div className="text-[10px] opacity-90">{formatCurrency(unrealizedPL, 'USD')}</div>
-                          </>
-                        ) : (
-                          <span>미실현손익</span>
-                        )}
-                      </span>
-                    ) : shouldShowCompactLabel(unrealizedPLWidth) ? (
-                      <span className="text-xs font-bold">{unrealizedPL >= 0 ? '미+' : '미-'}</span>
-                    ) : (
-                      <div className="w-1 h-1 bg-white rounded-full opacity-80" />
-                    )}
-                    
-                    {/* 작은 세그먼트용 외부 라벨 */}
-                    {unrealizedPLWidth < 8 && unrealizedPLWidth > 0.1 && (
-                      <div className={`absolute -top-8 left-1/2 transform -translate-x-1/2 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 pointer-events-none ${
-                        unrealizedPL >= 0 ? 'bg-emerald-600' : 'bg-rose-600'
-                      }`}>
-                        미실현손익: {formatCurrency(unrealizedPL, 'USD')}
-                        <div className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent ${
-                          unrealizedPL >= 0 ? 'border-t-emerald-600' : 'border-t-rose-600'
-                        }`} />
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-              
-              {/* 수치 라벨 - 바 아래에 각 세그먼트 위치에 맞춰 배치 (반응형) */}
-              <div className="relative mt-3 h-6 flex items-start">
-                {netInvestment !== 0 && netInvestmentWidth > 5 && ( // 5% 이상일 때만 바 아래 라벨 표시
-                  <div
-                    className="absolute text-xs sm:text-sm font-semibold font-numeric text-gray-600 dark:text-gray-400 whitespace-nowrap"
-                    style={{
-                      left: `${netInvestmentLeft}%`,
-                      maxWidth: `${Math.max(netInvestmentWidth, 10)}%`,
-                      transform: 'translateX(0)',
-                    }}
-                  >
-                    {!shouldShowAmount(netInvestmentWidth) && (
-                      <div className="truncate" title={formatCurrency(netInvestment, 'USD')}>
-                        순투자: {formatCurrency(netInvestment, 'USD')}
-                      </div>
-                    )}
-                  </div>
-                )}
-                {realizedPL !== 0 && realizedPLWidth > 5 && ( // 5% 이상일 때만 바 아래 라벨 표시
-                  <div
-                    className={`absolute text-xs sm:text-sm font-semibold font-numeric whitespace-nowrap ${
-                      realizedPL >= 0 
-                        ? 'text-green-600 dark:text-green-400' 
-                        : 'text-red-600 dark:text-red-400'
-                    }`}
-                    style={{
-                      left: `${realizedPLLeft}%`,
-                      maxWidth: `${Math.max(realizedPLWidth, 10)}%`,
-                      transform: 'translateX(0)',
-                    }}
-                  >
-                    {!shouldShowAmount(realizedPLWidth) && (
-                      <div className="truncate" title={formatCurrency(realizedPL, 'USD')}>
-                        실현: {formatCurrency(realizedPL, 'USD')}
-                      </div>
-                    )}
-                  </div>
-                )}
-                {unrealizedPL !== 0 && unrealizedPLWidth > 5 && ( // 5% 이상일 때만 바 아래 라벨 표시
-                  <div
-                    className={`absolute text-xs sm:text-sm font-semibold font-numeric whitespace-nowrap ${
-                      unrealizedPL >= 0 
-                        ? 'text-emerald-600 dark:text-emerald-400' 
-                        : 'text-rose-600 dark:text-rose-400'
-                    }`}
-                    style={{
-                      left: `${unrealizedPLLeft}%`,
-                      maxWidth: `${Math.max(unrealizedPLWidth, 10)}%`,
-                      transform: 'translateX(0)',
-                    }}
-                  >
-                    {!shouldShowAmount(unrealizedPLWidth) && (
-                      <div className="truncate" title={formatCurrency(unrealizedPL, 'USD')}>
-                        미실현: {formatCurrency(unrealizedPL, 'USD')}
-                      </div>
-                    )}
-                  </div>
-                )}
-                
-                {/* 작은 세그먼트들을 위한 요약 정보 (바 아래) */}
-                {(netInvestmentWidth < 5 || realizedPLWidth < 5 || unrealizedPLWidth < 5) && (
-                  <div className="absolute left-0 text-xs text-muted-foreground">
-                    작은 세그먼트는 마우스 호버로 확인하세요
-                  </div>
-                )}
-              </div>
+      {/* KPI 카드 4개 */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        {/* 카드 1: 총 평가금액 */}
+        <Card className="hover-lift relative overflow-hidden group animate-fade-in">
+          <div className="absolute inset-0 gradient-info opacity-5 group-hover:opacity-10 transition-opacity duration-300" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-sm font-medium text-muted-foreground">총 평가금액</CardTitle>
+            <div className="bg-gradient-to-br from-blue-500 to-blue-700 p-1.5 rounded-lg shadow-sm">
+              <Wallet className="h-4 w-4 text-white" />
             </div>
-          </div>
-        );
-      })()}
+          </CardHeader>
+          <CardContent className="relative z-10 space-y-1">
+            <div className="text-2xl font-bold font-numeric tracking-tight text-blue-700 dark:text-blue-400">
+              {formatCurrency(summary.total_market_value_usd ?? 0, 'USD')}
+            </div>
+            <div className="text-xs text-muted-foreground font-numeric">
+              {formatCurrency(summary.total_market_value_krw ?? 0, 'KRW')}
+            </div>
+            <div className="flex items-center gap-2 pt-1 text-xs text-muted-foreground">
+              <span className="font-numeric font-medium">{summary.active_positions_count ?? 0}개</span>
+              <span>종목 보유</span>
+              {(summary.total_cash_usd ?? 0) > 0 && (
+                <>
+                  <span className="text-gray-300 dark:text-gray-600">|</span>
+                  <span>현금 <span className="font-numeric">{formatCurrency(summary.total_cash_usd ?? 0, 'USD')}</span></span>
+                </>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 카드 2: 미실현 손익 */}
+        <Card className="hover-lift relative overflow-hidden group animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          <div className={`absolute inset-0 ${unrealizedPL >= 0 ? 'gradient-success' : 'gradient-danger'} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-sm font-medium text-muted-foreground">미실현 손익</CardTitle>
+            <div className={`bg-gradient-to-br ${unrealizedPL >= 0 ? 'from-green-500 to-green-700' : 'from-red-500 to-red-700'} p-1.5 rounded-lg shadow-sm`}>
+              {unrealizedPL >= 0
+                ? <TrendingUp className="h-4 w-4 text-white" />
+                : <TrendingDown className="h-4 w-4 text-white" />}
+            </div>
+          </CardHeader>
+          <CardContent className="relative z-10 space-y-1">
+            <div className={`text-2xl font-bold font-numeric tracking-tight ${unrealizedPL >= 0 ? 'text-profit' : 'text-loss'}`}>
+              {unrealizedPL >= 0 ? '+' : ''}{formatCurrency(unrealizedPL, 'USD')}
+            </div>
+            <div className="text-xs text-muted-foreground font-numeric">
+              {formatCurrency((summary.total_unrealized_pl_krw ?? 0), 'KRW')}
+            </div>
+            <div className={`text-xs font-semibold font-numeric pt-1 ${unrealizedPL >= 0 ? 'text-profit' : 'text-loss'}`}>
+              수익률 {formatPercent(summary.total_unrealized_pl_percent ?? 0)}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 카드 3: 실현 손익 + 총 손익 */}
+        <Card className="hover-lift relative overflow-hidden group animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <div className={`absolute inset-0 ${totalPL >= 0 ? 'gradient-success' : 'gradient-danger'} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-sm font-medium text-muted-foreground">손익 현황</CardTitle>
+            <div className={`bg-gradient-to-br ${totalPL >= 0 ? 'from-green-500 to-green-700' : 'from-red-500 to-red-700'} p-1.5 rounded-lg shadow-sm`}>
+              {totalPL >= 0
+                ? <TrendingUp className="h-4 w-4 text-white" />
+                : <TrendingDown className="h-4 w-4 text-white" />}
+            </div>
+          </CardHeader>
+          <CardContent className="relative z-10 space-y-1">
+            {/* 총 손익 */}
+            <div className={`text-2xl font-bold font-numeric tracking-tight ${totalPL >= 0 ? 'text-profit' : 'text-loss'}`}>
+              {totalPL >= 0 ? '+' : ''}{formatCurrency(totalPL, 'USD')}
+            </div>
+            {/* 실현 손익 서브 */}
+            <div className="text-xs text-muted-foreground font-numeric">
+              실현 <span className={`font-semibold ${realizedPL >= 0 ? 'text-profit' : 'text-loss'}`}>
+                {realizedPL >= 0 ? '+' : ''}{formatCurrency(realizedPL, 'USD')}
+              </span>
+            </div>
+            {/* 전일 대비 */}
+            {dayChange !== undefined && dayChange !== null && (
+              <div className={`text-xs font-semibold flex items-center gap-1 font-numeric pt-1 ${dayChange >= 0 ? 'text-profit' : 'text-loss'}`}>
+                {dayChange >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                전일대비 {dayChange >= 0 ? '+' : ''}{formatCurrency(dayChange, 'USD')}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 카드 4: 배당 + 현금 */}
+        <Card className="hover-lift relative overflow-hidden group animate-fade-in" style={{ animationDelay: '0.3s' }}>
+          <div className="absolute inset-0 gradient-success opacity-5 group-hover:opacity-10 transition-opacity duration-300" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-sm font-medium text-muted-foreground">배당 · 현금</CardTitle>
+            <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 p-1.5 rounded-lg shadow-sm">
+              <DollarSign className="h-4 w-4 text-white" />
+            </div>
+          </CardHeader>
+          <CardContent className="relative z-10 space-y-1">
+            <div className="text-2xl font-bold font-numeric tracking-tight text-emerald-700 dark:text-emerald-400">
+              {formatCurrency(summary.total_dividends_usd ?? 0, 'USD')}
+            </div>
+            <div className="text-xs text-muted-foreground font-numeric">
+              {formatCurrency(summary.total_dividends_krw ?? 0, 'KRW')}
+            </div>
+            <div className="text-xs text-muted-foreground pt-1">
+              현금 <span className="font-numeric font-semibold text-foreground">
+                {formatCurrency(summary.total_cash_usd ?? 0, 'USD')}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* 포트폴리오 가치 그래프 */}
       <PortfolioChart accountId={accountId} />
 
-      {/* 계정별 요약 정보 (전체 보기 모드에서만) */}
-      {accountId === null && summary?.accounts_summary && summary.accounts_summary.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>계정별 요약</CardTitle>
+      {/* 하단 2-컬럼: 상위 포지션 + 포트폴리오 구성 */}
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-5">
+        {/* 상위 포지션 미니 테이블 (3/5) */}
+        <Card className="lg:col-span-3">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <BarChart2 className="h-4 w-4 text-muted-foreground" />
+              상위 보유 종목
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2 px-4 min-w-[120px]">계정명</th>
-                    <th className="text-right py-2 px-4 min-w-[120px] hidden sm:table-cell">평가금액(USD)</th>
-                    <th className="text-right py-2 px-4 min-w-[120px] hidden md:table-cell">미실현 손익</th>
-                    <th className="text-right py-2 px-4 min-w-[120px] hidden lg:table-cell">실현 손익</th>
-                    <th className="text-right py-2 px-4 min-w-[120px]">총 손익</th>
-                    <th className="text-right py-2 px-4 min-w-[100px] hidden xl:table-cell">전일대비</th>
-                    <th className="text-right py-2 px-4 min-w-[80px]">보유 종목</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {summary.accounts_summary.map((acc) => (
-                    <tr key={`acc-${acc.account_id}`} className="border-b hover:bg-gray-50">
-                      <td className="py-2 px-4 font-medium">{acc.account_name ?? '알 수 없음'}</td>
-                      <td className="text-right py-2 px-4 hidden sm:table-cell">
-                        {formatCurrency(acc.total_market_value_usd, 'USD')}
-                      </td>
-                      <td className="text-right py-2 px-4 hidden md:table-cell">
-                        <span className={
-                          (acc.total_unrealized_pl_usd ?? 0) >= 0
-                            ? 'text-profit font-numeric'
-                            : 'text-loss font-numeric'
-                        }>
-                          {formatCurrency(acc.total_unrealized_pl_usd, 'USD')}
-                        </span>
-                        <br />
-                        <span className="text-xs font-numeric">
-                          ({formatPercent(acc.total_unrealized_pl_percent)})
-                        </span>
-                      </td>
-                      <td className="text-right py-2 px-4 hidden lg:table-cell">
-                        <span className={
-                          (acc.total_realized_pl_usd ?? 0) >= 0
-                            ? 'text-profit font-numeric'
-                            : 'text-loss font-numeric'
-                        }>
-                          {formatCurrency(acc.total_realized_pl_usd, 'USD')}
-                        </span>
-                      </td>
-                      <td
-                        className={`text-right py-2 px-4 font-medium font-numeric ${
-                          (acc.total_pl_usd ?? 0) >= 0 ? 'text-profit' : 'text-loss'
-                        }`}
-                      >
-                        {formatCurrency(acc.total_pl_usd, 'USD')}
-                      </td>
-                      <td className="text-right py-2 px-4 hidden xl:table-cell">
-                        {acc.day_change_pl_usd !== undefined && acc.day_change_pl_usd !== null ? (
-                          <span className={`flex items-center justify-end gap-1 font-numeric ${
-                            acc.day_change_pl_usd >= 0
-                              ? 'text-profit font-semibold'
-                              : 'text-loss font-semibold'
-                          }`}>
-                            {acc.day_change_pl_usd >= 0 ? (
-                              <TrendingUp className="h-3 w-3" aria-hidden="true" />
-                            ) : (
-                              <TrendingDown className="h-3 w-3" aria-hidden="true" />
-                            )}
-                            <span>{acc.day_change_pl_usd >= 0 ? '+' : ''}{formatCurrency(acc.day_change_pl_usd, 'USD')}</span>
-                          </span>
-                        ) : (
-                          <span className="text-muted-foreground text-xs">-</span>
-                        )}
-                      </td>
-                      <td className="text-right py-2 px-4">
-                        {acc.active_positions_count ?? 0}
-                      </td>
+          <CardContent className="px-0 pb-0">
+            {topPositions.length === 0 ? (
+              <div className="text-center text-muted-foreground text-sm py-8 px-4">보유 종목이 없습니다</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left px-4 py-2 text-xs font-medium text-muted-foreground">종목</th>
+                      <th className="text-right px-3 py-2 text-xs font-medium text-muted-foreground hidden sm:table-cell">현재가</th>
+                      <th className="text-right px-3 py-2 text-xs font-medium text-muted-foreground">평가금액</th>
+                      <th className="text-right px-3 py-2 text-xs font-medium text-muted-foreground hidden md:table-cell">비중</th>
+                      <th className="text-right px-3 py-2 text-xs font-medium text-muted-foreground">손익</th>
+                      <th className="text-right px-4 py-2 text-xs font-medium text-muted-foreground hidden lg:table-cell">전일</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {topPositions.map((pos) => {
+                      const plUSD = pos.unrealized_pl_usd ?? 0;
+                      const plPct = pos.unrealized_pl_percent ?? 0;
+                      const weight =
+                        totalMarketValue > 0
+                          ? ((pos.market_value_usd ?? 0) / totalMarketValue) * 100
+                          : 0;
+                      const dayChg = pos.day_change_pl_usd ?? null;
+                      return (
+                        <tr
+                          key={`${pos.account_id}-${pos.ticker}`}
+                          className="border-b border-border/50 hover:bg-muted/40 transition-colors"
+                        >
+                          <td className="px-4 py-1.5">
+                            <span className="font-semibold text-sm">{pos.ticker}</span>
+                          </td>
+                          <td className="text-right px-3 py-1.5 font-numeric text-xs hidden sm:table-cell">
+                            {pos.market_price_usd != null
+                              ? `$${pos.market_price_usd.toFixed(2)}`
+                              : '-'}
+                          </td>
+                          <td className="text-right px-3 py-1.5 font-numeric text-xs">
+                            {formatCurrency(pos.market_value_usd ?? 0, 'USD')}
+                          </td>
+                          <td className="text-right px-3 py-1.5 font-numeric text-xs hidden md:table-cell">
+                            {weight.toFixed(1)}%
+                          </td>
+                          <td className={`text-right px-3 py-1.5 font-numeric text-xs font-semibold ${plUSD >= 0 ? 'text-profit' : 'text-loss'}`}>
+                            {plUSD >= 0 ? '+' : ''}{formatCurrency(plUSD, 'USD')}
+                            <span className="text-[10px] ml-1 opacity-80">({formatPercent(plPct)})</span>
+                          </td>
+                          <td className={`text-right px-4 py-1.5 font-numeric text-xs hidden lg:table-cell ${dayChg != null ? (dayChg >= 0 ? 'text-profit' : 'text-loss') : 'text-muted-foreground'}`}>
+                            {dayChg != null
+                              ? `${dayChg >= 0 ? '+' : ''}${formatCurrency(dayChg, 'USD')}`
+                              : '-'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </CardContent>
         </Card>
-      )}
+
+        {/* 우측 패널 (2/5): 포트폴리오 구성 + 계정 요약 */}
+        <div className="lg:col-span-2 space-y-4">
+          {/* 포트폴리오 구성 바 */}
+          {totalAssets > 0 && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-semibold">포트폴리오 구성</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex h-8 rounded-md overflow-hidden border border-border shadow-sm">
+                  {netInvestment !== 0 && (
+                    <div
+                      className="flex items-center justify-center bg-gradient-to-r from-gray-500 to-gray-600 text-white text-[10px] font-semibold"
+                      style={{ width: `${Math.max(netInvestmentWidth, 1)}%`, minWidth: '6px' }}
+                      title={`순투자금액: ${formatCurrency(netInvestment, 'USD')}`}
+                    >
+                      {netInvestmentWidth > 12 && <span className="px-1 truncate">순투자</span>}
+                    </div>
+                  )}
+                  {realizedPL !== 0 && (
+                    <div
+                      className={`flex items-center justify-center text-white text-[10px] font-semibold ${realizedPL >= 0 ? 'bg-gradient-to-r from-green-600 to-green-700' : 'bg-gradient-to-r from-red-600 to-red-700'}`}
+                      style={{ width: `${Math.max(realizedPLWidth, 1)}%`, minWidth: '6px' }}
+                      title={`실현손익: ${formatCurrency(realizedPL, 'USD')}`}
+                    >
+                      {realizedPLWidth > 12 && <span className="px-1 truncate">실현</span>}
+                    </div>
+                  )}
+                  {unrealizedPL !== 0 && (
+                    <div
+                      className={`flex items-center justify-center text-white text-[10px] font-semibold rounded-r-md ${unrealizedPL >= 0 ? 'bg-gradient-to-r from-emerald-500 to-emerald-600' : 'bg-gradient-to-r from-rose-500 to-rose-600'}`}
+                      style={{ width: `${Math.max(unrealizedPLWidth, 1)}%`, minWidth: '6px' }}
+                      title={`미실현손익: ${formatCurrency(unrealizedPL, 'USD')}`}
+                    >
+                      {unrealizedPLWidth > 12 && <span className="px-1 truncate">미실현</span>}
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-1.5 text-xs">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-sm bg-gray-500 inline-block" />
+                      <span className="text-muted-foreground">순투자금액</span>
+                    </div>
+                    <span className="font-numeric font-medium">{formatCurrency(netInvestment, 'USD')}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-1.5">
+                      <span className={`w-2.5 h-2.5 rounded-sm inline-block ${realizedPL >= 0 ? 'bg-green-600' : 'bg-red-600'}`} />
+                      <span className="text-muted-foreground">실현 손익</span>
+                    </div>
+                    <span className={`font-numeric font-medium ${realizedPL >= 0 ? 'text-profit' : 'text-loss'}`}>
+                      {realizedPL >= 0 ? '+' : ''}{formatCurrency(realizedPL, 'USD')}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-1.5">
+                      <span className={`w-2.5 h-2.5 rounded-sm inline-block ${unrealizedPL >= 0 ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                      <span className="text-muted-foreground">미실현 손익</span>
+                    </div>
+                    <span className={`font-numeric font-medium ${unrealizedPL >= 0 ? 'text-profit' : 'text-loss'}`}>
+                      {unrealizedPL >= 0 ? '+' : ''}{formatCurrency(unrealizedPL, 'USD')}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* 계정별 요약 (전체 보기 모드에서만) */}
+          {accountId === null && summary?.accounts_summary && summary.accounts_summary.length > 0 && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-semibold">계정별 요약</CardTitle>
+              </CardHeader>
+              <CardContent className="px-0 pb-2">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left px-4 py-1.5 text-muted-foreground font-medium">계정</th>
+                      <th className="text-right px-3 py-1.5 text-muted-foreground font-medium">평가금액</th>
+                      <th className="text-right px-4 py-1.5 text-muted-foreground font-medium">총 손익</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {summary.accounts_summary.map((acc) => (
+                      <tr key={`acc-${acc.account_id}`} className="border-b border-border/50 hover:bg-muted/40">
+                        <td className="px-4 py-1.5 font-medium truncate max-w-[80px]">{acc.account_name ?? '—'}</td>
+                        <td className="text-right px-3 py-1.5 font-numeric">{formatCurrency(acc.total_market_value_usd, 'USD')}</td>
+                        <td className={`text-right px-4 py-1.5 font-numeric font-semibold ${(acc.total_pl_usd ?? 0) >= 0 ? 'text-profit' : 'text-loss'}`}>
+                          {(acc.total_pl_usd ?? 0) >= 0 ? '+' : ''}{formatCurrency(acc.total_pl_usd, 'USD')}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
-
-
-
-
