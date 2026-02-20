@@ -39,7 +39,7 @@ const TIME_RANGES: Record<TimeRange, { label: string; days: number }> = {
 
 export default function PortfolioChart({ accountId }: PortfolioChartProps) {
   const [selectedRange, setSelectedRange] = useState<TimeRange>('3M');
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [chartType, setChartType] = useState<ChartType>('area');
 
   // 날짜 범위 계산
@@ -388,7 +388,7 @@ export default function PortfolioChart({ accountId }: PortfolioChartProps) {
           </CardHeader>
           
           <CardContent className="pt-0">
-            <div className="h-96 w-full bg-gradient-to-br from-gray-50/50 to-white dark:from-gray-900/50 dark:to-gray-800/50 rounded-lg p-4 border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
+            <div className="h-80 w-full bg-gradient-to-br from-gray-50/50 to-white dark:from-gray-900/50 dark:to-gray-800/50 rounded-lg p-4 border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
               <ResponsiveContainer width="100%" height="100%">
                 {chartType === 'line' ? (
                   <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 20 }}>
