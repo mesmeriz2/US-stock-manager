@@ -98,10 +98,17 @@ def analyze_portfolio(
         market_value = position.get('market_value_usd', 0) or 0
         unrealized_pl = position.get('unrealized_pl_usd', 0) or 0
         
-        # yfinance 호출 제거 - 기본값 사용
-        sector = 'Unknown'
-        industry = 'Unknown'
-        long_name = ticker  # 기본값으로 ticker 사용
+        # 섹터/산업 정보 조회 (24시간 인메모리 캐시 활용)
+        try:
+            stock_info = stock_info_service.get_stock_info(ticker)
+            sector = stock_info.get('sector', 'Unknown') or 'Unknown'
+            industry = stock_info.get('industry', 'Unknown') or 'Unknown'
+            long_name = stock_info.get('longName', ticker) or ticker
+        except Exception as e:
+            logger.warning(f"[ANALYSIS] {ticker} 섹터/산업 정보 조회 실패: {e}")
+            sector = 'Unknown'
+            industry = 'Unknown'
+            long_name = ticker
         
         # DB에서 배당금 조회 (yfinance 호출 없이)
         yearly_dividend = dividend_data_by_ticker.get(ticker.upper(), 0.0)  # 대소문자 일치 확인

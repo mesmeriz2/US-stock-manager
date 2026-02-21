@@ -610,7 +610,7 @@ export default function PortfolioAnalysis({ accountId }: PortfolioAnalysisProps)
       )}
 
       {/* 드로우다운 분석 */}
-      {drawdownData.length > 0 && (
+      {allSnapshots && allSnapshots.length > 0 && (
         <Card>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between flex-wrap gap-2">
@@ -628,57 +628,65 @@ export default function PortfolioAnalysis({ accountId }: PortfolioAnalysisProps)
             </div>
           </CardHeader>
           <CardContent>
-            {drawdownStats && (
-              <div className="grid grid-cols-3 gap-3 mb-4">
-                <div className="bg-muted/50 rounded-lg p-3">
-                  <div className="text-xs text-muted-foreground mb-1">현재 드로우다운</div>
-                  <div className={`text-lg font-bold font-numeric ${drawdownStats.currentDrawdown < -5 ? 'text-loss' : drawdownStats.currentDrawdown < -1 ? 'text-yellow-600 dark:text-yellow-400' : 'text-profit'}`}>
-                    {drawdownStats.currentDrawdown.toFixed(2)}%
-                  </div>
-                </div>
-                <div className="bg-muted/50 rounded-lg p-3">
-                  <div className="text-xs text-muted-foreground mb-1">최대 드로우다운</div>
-                  <div className="text-lg font-bold font-numeric text-loss">{drawdownStats.maxDrawdown.toFixed(2)}%</div>
-                  {drawdownStats.maxDrawdownDate && (
-                    <div className="text-[10px] text-muted-foreground font-numeric mt-0.5">
-                      {format(new Date(drawdownStats.maxDrawdownDate), 'yyyy.MM.dd')}
-                    </div>
-                  )}
-                </div>
-                <div className="bg-muted/50 rounded-lg p-3">
-                  <div className="text-xs text-muted-foreground mb-1">구간 최고점</div>
-                  <div className="text-lg font-bold font-numeric text-blue-600 dark:text-blue-400">
-                    {formatCurrency(drawdownStats.peakValue, 'USD')}
-                  </div>
-                  {drawdownStats.peakDate && (
-                    <div className="text-[10px] text-muted-foreground font-numeric mt-0.5">
-                      {format(new Date(drawdownStats.peakDate), 'yyyy.MM.dd')}
-                    </div>
-                  )}
-                </div>
+            {drawdownData.length === 0 ? (
+              <div className="h-44 flex items-center justify-center text-sm text-muted-foreground">
+                선택한 기간({drawdownRange}) 내 스냅샷 데이터가 없습니다.
               </div>
+            ) : (
+              <>
+                {drawdownStats && (
+                  <div className="grid grid-cols-3 gap-3 mb-4">
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <div className="text-xs text-muted-foreground mb-1">현재 드로우다운</div>
+                      <div className={`text-lg font-bold font-numeric ${drawdownStats.currentDrawdown < -5 ? 'text-loss' : drawdownStats.currentDrawdown < -1 ? 'text-yellow-600 dark:text-yellow-400' : 'text-profit'}`}>
+                        {drawdownStats.currentDrawdown.toFixed(2)}%
+                      </div>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <div className="text-xs text-muted-foreground mb-1">최대 드로우다운</div>
+                      <div className="text-lg font-bold font-numeric text-loss">{drawdownStats.maxDrawdown.toFixed(2)}%</div>
+                      {drawdownStats.maxDrawdownDate && (
+                        <div className="text-[10px] text-muted-foreground font-numeric mt-0.5">
+                          {format(new Date(drawdownStats.maxDrawdownDate), 'yyyy.MM.dd')}
+                        </div>
+                      )}
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <div className="text-xs text-muted-foreground mb-1">구간 최고점</div>
+                      <div className="text-lg font-bold font-numeric text-blue-600 dark:text-blue-400">
+                        {formatCurrency(drawdownStats.peakValue, 'USD')}
+                      </div>
+                      {drawdownStats.peakDate && (
+                        <div className="text-[10px] text-muted-foreground font-numeric mt-0.5">
+                          {format(new Date(drawdownStats.peakDate), 'yyyy.MM.dd')}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                <div className="h-44">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={drawdownData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                      <defs>
+                        <linearGradient id="ddGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#ef4444" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#ef4444" stopOpacity={0.05} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700" />
+                      <XAxis dataKey="date" tickFormatter={(v) => format(new Date(v), 'MM/dd')} stroke="#9ca3af" fontSize={10} interval="preserveStartEnd" />
+                      <YAxis tickFormatter={(v) => `${v.toFixed(0)}%`} stroke="#9ca3af" fontSize={10} domain={['auto', 0]} />
+                      <Tooltip
+                        formatter={(value: number) => [`${value.toFixed(2)}%`, '드로우다운']}
+                        labelFormatter={(label) => format(new Date(label), 'yyyy년 MM월 dd일')}
+                      />
+                      <ReferenceLine y={0} stroke="#6b7280" strokeWidth={1} />
+                      <Area type="monotone" dataKey="drawdown" stroke="#ef4444" strokeWidth={2} fill="url(#ddGrad)" dot={false} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </>
             )}
-            <div className="h-44">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={drawdownData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                  <defs>
-                    <linearGradient id="ddGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#ef4444" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#ef4444" stopOpacity={0.05} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700" />
-                  <XAxis dataKey="date" tickFormatter={(v) => format(new Date(v), 'MM/dd')} stroke="#9ca3af" fontSize={10} interval="preserveStartEnd" />
-                  <YAxis tickFormatter={(v) => `${v.toFixed(0)}%`} stroke="#9ca3af" fontSize={10} domain={['auto', 0]} />
-                  <Tooltip
-                    formatter={(value: number) => [`${value.toFixed(2)}%`, '드로우다운']}
-                    labelFormatter={(label) => format(new Date(label), 'yyyy년 MM월 dd일')}
-                  />
-                  <ReferenceLine y={0} stroke="#6b7280" strokeWidth={1} />
-                  <Area type="monotone" dataKey="drawdown" stroke="#ef4444" strokeWidth={2} fill="url(#ddGrad)" dot={false} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
           </CardContent>
         </Card>
       )}
