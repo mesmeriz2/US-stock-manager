@@ -114,11 +114,11 @@ def _match_etf_category_by_keyword(category: str) -> str:
 
     cat_lower = category.lower()
     keyword_map = [
-        (['bond', 'fixed', 'treasury', 'muni', 'debt', 'income'], 'Fixed Income'),
+        (['bond', 'fixed', 'treasury', 'municipal', 'debt'], 'Fixed Income'),
         (['emerging', 'china', 'india', 'brazil', 'latin'], 'Emerging Markets'),
         (['foreign', 'international', 'world', 'global', 'europe', 'japan', 'pacific'], 'International Equity'),
-        (['technology', 'tech', 'software', 'semiconductor'], 'Technology'),
         (['health', 'biotech', 'pharma', 'medical'], 'Healthcare'),
+        (['technology', 'tech', 'software', 'semiconductor'], 'Technology'),
         (['financial', 'bank'], 'Financial Services'),
         (['energy', 'oil', 'gas'], 'Energy'),
         (['real estate', 'reit'], 'Real Estate'),
