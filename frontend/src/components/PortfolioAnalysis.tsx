@@ -52,6 +52,14 @@ const SECTOR_COLORS: Record<string, string> = {
   'Basic Materials': '#f97316',
   'Real Estate': '#6366f1',
   'Utilities': '#14b8a6',
+  // ETF 전용 섹터
+  'Broad Market': '#2563eb',
+  'International Equity': '#0891b2',
+  'Emerging Markets': '#d946ef',
+  'Fixed Income': '#64748b',
+  'Commodities': '#ca8a04',
+  'Alternative': '#78716c',
+  'Other ETF': '#a1a1aa',
   'Unknown': '#9ca3af',
 };
 
