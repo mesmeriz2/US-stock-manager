@@ -487,6 +487,19 @@ export interface RestoreResponse {
   errors: string[];
 }
 
+// Market Index
+export interface NasdaqIndexData {
+  symbol: string;
+  price: number;
+  change: number;
+  change_percent: number;
+  previous_close: number;
+  is_futures: boolean;
+  market_state: 'open' | 'pre_market' | 'post_market' | 'closed';
+  as_of: string;
+  cached: boolean;
+}
+
 
 
 

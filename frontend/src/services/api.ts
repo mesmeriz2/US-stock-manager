@@ -436,5 +436,10 @@ export const splitsApi = {
     }),
 };
 
+// Market Index
+export const marketApi = {
+  getNasdaqIndex: () => api.get<import('../types').NasdaqIndexData>('/market/indices/'),
+};
+
 export default api;
 

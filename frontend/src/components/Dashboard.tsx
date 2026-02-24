@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { dashboardApi, backgroundApi, positionsApi } from '@/services/api';
+import { dashboardApi, backgroundApi, positionsApi, marketApi } from '@/services/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DashboardSkeleton } from '@/components/ui/skeleton';
@@ -61,6 +61,14 @@ export default function Dashboard({ accountId }: DashboardProps) {
         .then((res) => res.data),
     refetchInterval: 60000,
     retry: 2,
+  });
+
+  // NASDAQ 지수 데이터
+  const { data: nasdaqData } = useQuery({
+    queryKey: ['nasdaq-index'],
+    queryFn: () => marketApi.getNasdaqIndex().then((r) => r.data),
+    refetchInterval: 60000,
+    retry: 1,
   });
 
   // 백그라운드 로딩 상태 조회
@@ -231,6 +239,43 @@ export default function Dashboard({ accountId }: DashboardProps) {
 
       {/* KPI 카드 4개 */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        {/* 카드 0: NASDAQ 지수 */}
+        <Card className="hover-lift relative overflow-hidden group animate-fade-in">
+          <div className="absolute inset-0 gradient-info opacity-5 group-hover:opacity-10 transition-opacity duration-300" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {nasdaqData ? (nasdaqData.is_futures ? 'NASDAQ 선물 (NQ=F)' : 'NASDAQ 100') : 'NASDAQ'}
+            </CardTitle>
+            <div className={`bg-gradient-to-br ${!nasdaqData || nasdaqData.change_percent >= 0 ? 'from-indigo-500 to-indigo-700' : 'from-red-500 to-red-700'} p-1.5 rounded-lg shadow-sm`}>
+              <TrendingUp className="h-4 w-4 text-white" />
+            </div>
+          </CardHeader>
+          <CardContent className="relative z-10 space-y-1">
+            {nasdaqData ? (
+              <>
+                <div className={`text-2xl font-bold font-numeric tracking-tight ${nasdaqData.change_percent >= 0 ? 'text-profit' : 'text-loss'}`}>
+                  {nasdaqData.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+                <div className={`text-xs font-semibold font-numeric flex items-center gap-1 ${nasdaqData.change_percent >= 0 ? 'text-profit' : 'text-loss'}`}>
+                  {nasdaqData.change_percent >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                  {nasdaqData.change >= 0 ? '+' : ''}{nasdaqData.change.toFixed(2)}
+                  &nbsp;{nasdaqData.change_percent >= 0 ? '+' : ''}{nasdaqData.change_percent.toFixed(2)}%
+                </div>
+                <div className="text-xs text-muted-foreground pt-1">
+                  {nasdaqData.market_state === 'open' ? '개장중' :
+                   nasdaqData.market_state === 'pre_market' ? '프리마켓 선물' :
+                   nasdaqData.market_state === 'post_market' ? '장 마감' : '휴장'}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="text-2xl font-bold font-numeric text-muted-foreground">-</div>
+                <div className="text-xs text-muted-foreground">데이터 없음</div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
         {/* 카드 1: 총 평가금액 */}
         <Card className="hover-lift relative overflow-hidden group animate-fade-in">
           <div className="absolute inset-0 gradient-info opacity-5 group-hover:opacity-10 transition-opacity duration-300" />
@@ -316,29 +361,6 @@ export default function Dashboard({ accountId }: DashboardProps) {
           </CardContent>
         </Card>
 
-        {/* 카드 4: 배당 + 현금 */}
-        <Card className="hover-lift relative overflow-hidden group animate-fade-in" style={{ animationDelay: '0.3s' }}>
-          <div className="absolute inset-0 gradient-success opacity-5 group-hover:opacity-10 transition-opacity duration-300" />
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-            <CardTitle className="text-sm font-medium text-muted-foreground">배당 · 현금</CardTitle>
-            <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 p-1.5 rounded-lg shadow-sm">
-              <DollarSign className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent className="relative z-10 space-y-1">
-            <div className="text-2xl font-bold font-numeric tracking-tight text-emerald-700 dark:text-emerald-400">
-              {formatCurrency(summary.total_dividends_usd ?? 0, 'USD')}
-            </div>
-            <div className="text-xs text-muted-foreground font-numeric">
-              {formatCurrency(summary.total_dividends_krw ?? 0, 'KRW')}
-            </div>
-            <div className="text-xs text-muted-foreground pt-1">
-              현금 <span className="font-numeric font-semibold text-foreground">
-                {formatCurrency(summary.total_cash_usd ?? 0, 'USD')}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* 포트폴리오 가치 그래프 */}

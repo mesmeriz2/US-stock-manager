@@ -660,3 +660,20 @@ class StockSplitPreview(BaseModel):
     accounts: List[Dict[str, Any]]  # 영향받을 계정 목록
     sample_trades: List[Dict[str, Any]]  # 샘플 거래 (최대 10개)
     warning: Optional[str] = None  # 경고 메시지 (중복 등)
+
+
+# =====================================================================
+# Market Index Schemas
+# =====================================================================
+
+class NasdaqIndexData(BaseModel):
+    """NASDAQ 지수 / 선물 데이터"""
+    symbol: str            # "^NDX" 또는 "NQ=F"
+    price: float
+    change: float
+    change_percent: float
+    previous_close: float
+    is_futures: bool
+    market_state: str      # 'open' | 'pre_market' | 'post_market' | 'closed'
+    as_of: str
+    cached: bool
