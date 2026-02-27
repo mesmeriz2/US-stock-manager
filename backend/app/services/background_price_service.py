@@ -20,7 +20,7 @@ class BackgroundPriceService:
         self.loading_status: Dict[str, Dict] = {}
         self.price_cache: Dict[str, Dict] = {}
         self.last_update = None
-        self.update_interval = 300  # 5분마다 업데이트
+        self.update_interval = 120  # 2분마다 업데이트
         self.callbacks: List[Callable] = []
         self._lock = threading.Lock()
     

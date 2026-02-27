@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { positionsApi, finnhubApi } from '@/services/api';
-import { Position, FinnhubFinancials } from '@/types';
+import { positionsApi } from '@/services/api';
+import { Position } from '@/types';
 import { formatCurrency, formatPercent, formatNumber } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,8 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ArrowUpDown, RefreshCw, AlertCircle, Info, Search, Calculator } from 'lucide-react';
-import SellSimulationModal from './SellSimulationModal';
+import { ArrowUpDown, RefreshCw, AlertCircle, Search } from 'lucide-react';
 
 type SortField = 'ticker' | 'shares' | 'avg_cost_usd' | 'market_price_usd' | 'market_value_usd' | 'day_change_pl_usd' | 'day_change_pl_percent' | 'realized_pl_usd' | 'unrealized_pl_usd' | 'unrealized_pl_percent' | 'weight' | 'holding_days';
 type SortDirection = 'asc' | 'desc';
@@ -29,9 +28,7 @@ export default function PositionsTable({ accountId }: PositionsTableProps) {
   const [includeClosed, setIncludeClosed] = useState(false);
   const [sortField, setSortField] = useState<SortField>('ticker');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
-  const [hoveredTicker, setHoveredTicker] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [simulationPosition, setSimulationPosition] = useState<Position | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
   // 모바일 감지
@@ -50,17 +47,6 @@ export default function PositionsTable({ accountId }: PositionsTableProps) {
       positionsApi
         .getAll({ account_id: accountId || undefined, include_closed: includeClosed })
         .then((res) => res.data),
-  });
-
-  // 호버된 티커의 재무 데이터 조회
-  const { data: financialData } = useQuery({
-    queryKey: ['finnhub-financials', hoveredTicker],
-    queryFn: () =>
-      hoveredTicker
-        ? finnhubApi.getFinancials(hoveredTicker).then((res) => res.data)
-        : Promise.resolve(null),
-    enabled: !!hoveredTicker,
-    staleTime: 24 * 60 * 60 * 1000, // 24시간
   });
 
   const handleSort = useCallback((field: SortField) => {
@@ -88,9 +74,9 @@ export default function PositionsTable({ accountId }: PositionsTableProps) {
   const filteredPositions = useMemo(() => {
     if (!positions) return [];
     if (!searchQuery.trim()) return positions;
-    
+
     const query = searchQuery.toLowerCase();
-    return positions.filter(position => 
+    return positions.filter(position =>
       position.ticker.toLowerCase().includes(query)
     );
   }, [positions, searchQuery]);
@@ -101,30 +87,30 @@ export default function PositionsTable({ accountId }: PositionsTableProps) {
     return [...filteredPositions].sort((a, b) => {
     let aVal = a[sortField];
     let bVal = b[sortField];
-    
+
     // 비중 정렬의 경우 계산된 비중 사용
     if (sortField === 'weight') {
-      const aWeight = a.shares > 0 && a.market_value_usd != null && totalMarketValue > 0 
-        ? (a.market_value_usd / totalMarketValue) * 100 
+      const aWeight = a.shares > 0 && a.market_value_usd != null && totalMarketValue > 0
+        ? (a.market_value_usd / totalMarketValue) * 100
         : 0;
-      const bWeight = b.shares > 0 && b.market_value_usd != null && totalMarketValue > 0 
-        ? (b.market_value_usd / totalMarketValue) * 100 
+      const bWeight = b.shares > 0 && b.market_value_usd != null && totalMarketValue > 0
+        ? (b.market_value_usd / totalMarketValue) * 100
         : 0;
       aVal = aWeight;
       bVal = bWeight;
     }
-    
+
     const direction = sortDirection === 'asc' ? 1 : -1;
-    
+
     // null/undefined를 맨 뒤로 정렬
     if (aVal == null && bVal == null) return 0;
     if (aVal == null) return 1;
     if (bVal == null) return -1;
-    
+
     if (typeof aVal === 'string' && typeof bVal === 'string') {
       return direction * aVal.localeCompare(bVal);
     }
-    
+
     return direction * ((aVal as number) - (bVal as number));
     });
   }, [filteredPositions, sortField, sortDirection, totalMarketValue]);
@@ -132,7 +118,7 @@ export default function PositionsTable({ accountId }: PositionsTableProps) {
   // 보유 기간 포맷팅 함수 (메모이제이션)
   const formatHoldingDays = useCallback((days: number | undefined | null): string => {
     if (days == null) return '-';
-    
+
     if (days < 30) {
       return `${days}일`;
     } else if (days < 365) {
@@ -145,19 +131,6 @@ export default function PositionsTable({ accountId }: PositionsTableProps) {
     }
   }, []);
 
-  // ESC 키로 모달 닫기
-  useEffect(() => {
-    if (hoveredTicker) {
-      const handleEscape = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-          setHoveredTicker(null);
-        }
-      };
-      window.addEventListener('keydown', handleEscape);
-      return () => window.removeEventListener('keydown', handleEscape);
-    }
-  }, [hoveredTicker]);
-
   if (isLoading) {
     return <div className="text-center p-8">로딩 중...</div>;
   }
@@ -166,13 +139,13 @@ export default function PositionsTable({ accountId }: PositionsTableProps) {
   const MobilePositionCard = ({ position }: { position: Position }) => {
     const isPriceLoaded = position.market_price_usd != null;
     const isClosed = position.shares <= 0;
-    
+
     return (
       <Card className={`mb-3 hover-lift ${
-        isClosed 
-          ? 'bg-gray-100 dark:bg-gray-800/50' 
-          : !isPriceLoaded 
-            ? 'bg-amber-50 dark:bg-amber-950/20' 
+        isClosed
+          ? 'bg-gray-100 dark:bg-gray-800/50'
+          : !isPriceLoaded
+            ? 'bg-amber-50 dark:bg-amber-950/20'
             : ''
       }`}>
         <CardContent className="p-4">
@@ -184,15 +157,6 @@ export default function PositionsTable({ accountId }: PositionsTableProps) {
               >
                 {position.ticker}
               </button>
-              <button
-                onMouseEnter={() => setHoveredTicker(position.ticker)}
-                onMouseLeave={() => setHoveredTicker(null)}
-                onClick={() => setHoveredTicker(position.ticker)}
-                className="p-1"
-                aria-label={`${position.ticker} 재무 정보 보기`}
-              >
-                <Info className="h-4 w-4 text-blue-400" />
-              </button>
               {!isPriceLoaded && !isClosed && (
                 <AlertCircle className="h-4 w-4 text-amber-500" title="가격 정보 대기 중" />
               )}
@@ -202,17 +166,8 @@ export default function PositionsTable({ accountId }: PositionsTableProps) {
                 </span>
               )}
             </div>
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={() => setSimulationPosition(position)}
-              disabled={position.shares <= 0}
-              className="min-h-[44px] min-w-[44px]"
-            >
-              <Calculator className="h-4 w-4" />
-            </Button>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div>
               <div className="text-muted-foreground text-xs mb-1">보유수량</div>
@@ -222,7 +177,7 @@ export default function PositionsTable({ accountId }: PositionsTableProps) {
               <div className="text-muted-foreground text-xs mb-1">보유기간</div>
               <div className="font-medium">{formatHoldingDays(position.holding_days)}</div>
             </div>
-            
+
             {/* 전량 매도 종목: 실현손익만 표시 */}
             {isClosed ? (
               <>
@@ -272,8 +227,8 @@ export default function PositionsTable({ accountId }: PositionsTableProps) {
                   <div className="text-muted-foreground text-xs mb-1">수익률</div>
                   <div className={`font-bold font-numeric text-base ${
                     isPriceLoaded && position.unrealized_pl_percent != null
-                      ? position.unrealized_pl_percent >= 0 
-                        ? 'text-profit' 
+                      ? position.unrealized_pl_percent >= 0
+                        ? 'text-profit'
                         : 'text-loss'
                       : ''
                   }`}>
@@ -504,15 +459,12 @@ export default function PositionsTable({ accountId }: PositionsTableProps) {
                     <ArrowUpDown className={`h-3 w-3 transition-transform ${sortField === 'unrealized_pl_percent' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
                   </button>
                 </TableHead>
-                <TableHead className="text-center min-w-[60px] py-2 px-2">
-                  <span className="text-muted-foreground">액션</span>
-                </TableHead>
               </TableRow>
             </TableHeader>
           <TableBody>
             {sortedPositions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={13} className="text-center text-muted-foreground py-12">
+                <TableCell colSpan={11} className="text-center text-muted-foreground py-12">
                   <div className="flex flex-col items-center gap-2">
                     <div className="text-4xl mb-2">📊</div>
                     <div className="text-lg font-medium">포지션이 없습니다</div>
@@ -524,29 +476,16 @@ export default function PositionsTable({ accountId }: PositionsTableProps) {
               sortedPositions.map((position) => {
                 const isPriceLoaded = position.market_price_usd != null;
                 const isClosed = position.shares <= 0;
-                const rowClassName = isClosed 
-                  ? 'bg-gray-100 dark:bg-gray-800/50' 
-                  : !isPriceLoaded 
-                    ? 'bg-amber-50' 
+                const rowClassName = isClosed
+                  ? 'bg-gray-100 dark:bg-gray-800/50'
+                  : !isPriceLoaded
+                    ? 'bg-amber-50'
                     : '';
 
-                // 비중 계산 (전량 매도된 주식은 비중 표시하지 않음)
-                const weight = position.shares > 0 && position.market_value_usd != null && totalMarketValue > 0
-                  ? (position.market_value_usd / totalMarketValue) * 100
-                  : null;
-                
                 return (
                   <TableRow key={position.ticker} className={`${rowClassName} animate-fade-in`}>
                     <TableCell className="font-medium py-2 px-3">
                       <div className="flex items-center gap-2">
-                        {/* 재무 정보 아이콘 - 티커 앞에 배치 */}
-                        <div 
-                          className="relative"
-                          onMouseEnter={() => setHoveredTicker(position.ticker)}
-                          onMouseLeave={() => setHoveredTicker(null)}
-                        >
-                          <Info className="h-4 w-4 text-blue-400 cursor-help flex-shrink-0" />
-                        </div>
                         <button
                           onClick={() => window.open(`https://finance.yahoo.com/quote/${position.ticker}/`, '_blank')}
                           className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
@@ -676,17 +615,6 @@ export default function PositionsTable({ accountId }: PositionsTableProps) {
                         </span>
                       )}
                     </TableCell>
-                    <TableCell className="text-center py-2 px-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setSimulationPosition(position)}
-                        disabled={position.shares <= 0}
-                        title="매도 시뮬레이션"
-                      >
-                        <Calculator className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
                   </TableRow>
                 );
               })
@@ -697,74 +625,6 @@ export default function PositionsTable({ accountId }: PositionsTableProps) {
         )}
       </CardContent>
     </Card>
-
-    {/* 재무 데이터 모달 - 화면 중앙에 고정 표시 */}
-    {hoveredTicker && financialData && (
-      <div 
-        className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 pointer-events-none animate-fade-in"
-        onMouseEnter={() => setHoveredTicker(hoveredTicker)}
-        onMouseLeave={() => setHoveredTicker(null)}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="financial-modal-title"
-      >
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-elevation-5 w-full max-w-md sm:max-w-lg max-h-[85vh] overflow-hidden pointer-events-auto animate-scale-in">
-          <div className="sticky top-0 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10 border-b border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between z-10">
-            <h4 id="financial-modal-title" className="font-semibold text-lg text-gradient-primary">{hoveredTicker} 재무 정보</h4>
-            <button 
-              onClick={() => setHoveredTicker(null)}
-              aria-label="모달 닫기"
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded p-1"
-            >
-              <span className="text-2xl leading-none">&times;</span>
-            </button>
-          </div>
-          
-          <div className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(85vh - 60px)' }}>
-            {Object.keys(financialData.details).length > 0 ? (
-              <div className="space-y-4">
-                {Object.entries(financialData.details).map(([category, metrics]) => (
-                  <div key={category} className="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-b-0">
-                    <div className="font-semibold text-blue-600 dark:text-blue-400 mb-3 text-base bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10 p-2 rounded-lg">
-                      {category}
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {Object.entries(metrics).map(([key, value]) => (
-                        <div key={key} className="flex justify-between items-center bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-900 dark:to-gray-800/50 rounded-lg p-2.5 border border-gray-200/50 dark:border-gray-700/50 hover-lift">
-                          <span className="text-gray-700 dark:text-gray-300 text-sm font-medium">{key}</span>
-                          <span className="font-bold text-sm text-blue-600 dark:text-blue-400">
-                            {typeof value === 'number' 
-                              ? value.toFixed(2) 
-                              : '-'}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                재무 데이터를 불러오는 중...
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    )}
-
-    {/* 매도 시뮬레이션 모달 */}
-    <SellSimulationModal
-      position={simulationPosition}
-      isOpen={simulationPosition !== null}
-      onClose={() => setSimulationPosition(null)}
-      selectedAccountId={accountId}
-    />
   </>
   );
 }
-
-
-
-
-

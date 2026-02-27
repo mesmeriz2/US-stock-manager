@@ -8,7 +8,6 @@ services:
     environment:
       - DATABASE_URL=sqlite:////data/stock_manager.db
       - CORS_ORIGINS=http://localhost:5173,http://localhost:3000,https://mem.photos,http://mem.photos
-      - FINNHUB_API_KEY=${FINNHUB_API_KEY}
       - TZ=Asia/Seoul
     volumes:
       - ./data:/data

@@ -14,7 +14,6 @@ import pytz
 from .. import crud, schemas
 from ..services.position_engine import PositionEngine
 from ..services.price_aggregator import price_aggregator
-from ..services.finnhub_service import finnhub_service
 
 logger = logging.getLogger(__name__)
 

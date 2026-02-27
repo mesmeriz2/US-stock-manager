@@ -20,7 +20,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 from .database import init_db
-from .api import trades, positions, prices, fx, dashboard, health, background, cash, accounts, finnhub, snapshots, dividends, simulation, analysis, backup, splits, market
+from .api import trades, positions, prices, fx, dashboard, health, background, cash, accounts, snapshots, dividends, analysis, backup, splits, market
 from .services.background_price_service import background_price_service
 from .services.scheduler_service import snapshot_scheduler
 
@@ -93,10 +93,8 @@ app.include_router(dashboard.router)
 app.include_router(health.router)
 app.include_router(background.router)
 app.include_router(cash.router)
-app.include_router(finnhub.router)
 app.include_router(snapshots.router)
 app.include_router(dividends.router)
-app.include_router(simulation.router)
 app.include_router(analysis.router)
 app.include_router(backup.router)
 app.include_router(splits.router)

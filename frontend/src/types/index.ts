@@ -147,23 +147,6 @@ export interface CashSummary {
   total_withdrawals_usd: number;
 }
 
-export interface FinnhubFinancials {
-  summary: {
-    peRatio?: number;
-    dividendYield?: number;
-    marketCap?: number;
-    '52WeekHigh'?: number;
-    '52WeekLow'?: number;
-  };
-  details: {
-    [category: string]: {
-      [key: string]: number | undefined;
-    };
-  };
-  raw: {
-    [key: string]: number | undefined;
-  };
-}
 
 export interface DailySnapshot {
   id: number;

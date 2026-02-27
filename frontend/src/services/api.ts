@@ -10,7 +10,6 @@ import type {
   TickerValidation,
   Cash,
   CashSummary,
-  FinnhubFinancials,
   DailySnapshot,
   Dividend,
   DividendSummary,
@@ -239,15 +238,6 @@ export const cashApi = {
     api.get<CashSummary>('/cash/balance', { params: { account_id: accountId } }),
 };
 
-// Finnhub
-export const finnhubApi = {
-  getFinancials: (ticker: string) =>
-    api.get<FinnhubFinancials>(`/finnhub/financials/${ticker}`),
-  
-  getFinancialsRaw: (ticker: string) =>
-    api.get(`/finnhub/financials/raw/${ticker}`),
-};
-
 // Snapshots
 export const snapshotsApi = {
   getRange: (params: {
@@ -332,15 +322,6 @@ export const dividendsApi = {
 
   getYearPreview: (account_id: number, year: number, tickers?: string[]) =>
     api.get(`/dividends/year-preview/${account_id}/${year}/`, { params: { tickers } }),
-};
-
-// Simulation
-export const simulationApi = {
-  simulateSell: (params: {
-    ticker: string;
-    shares_to_sell: number;
-    account_id?: number;
-  }) => api.get('/simulation/sell/', { params }),
 };
 
 // Analysis
