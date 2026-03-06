@@ -1,8 +1,4 @@
-/**
- * 디자인 토큰 - 디자인 시스템의 기본 값들을 정의
- */
 export const designTokens = {
-  // 색상
   colors: {
     profit: 'hsl(var(--profit))',
     profitLight: 'hsl(var(--profit-light))',
@@ -12,51 +8,26 @@ export const designTokens = {
     lossDark: 'hsl(var(--loss-dark))',
     neutral: 'hsl(var(--neutral))',
     warning: 'hsl(var(--warning))',
+    gold: '#D4A853',
+    goldLight: '#E8C170',
   },
-  
-  // 간격
   spacing: {
-    safe: '0.875rem',           // 14px - 안전한 최소 간격
-    touch: '2.75rem',            // 44px - 터치 타겟 크기
-    mobilePadding: '1rem',       // 16px - 모바일 패딩
-    desktopPadding: '2rem',      // 32px - 데스크탑 패딩
-    sectionGap: 'clamp(1.5rem, 5vw, 3rem)', // 반응형 섹션 간격
+    safe: '0.875rem',
+    touch: '2.75rem',
+    mobilePadding: '1rem',
+    desktopPadding: '2rem',
+    sectionGap: 'clamp(1.5rem, 4vw, 2.5rem)',
   },
-  
-  // 폰트 크기
   fontSize: {
-    xs: '0.75rem',      // 12px
-    sm: '0.875rem',     // 14px
-    base: '1rem',       // 16px
-    lg: '1.125rem',     // 18px
-    xl: '1.25rem',      // 20px
-    '2xl': '1.5rem',    // 24px
-    '3xl': '1.875rem',  // 30px
-    '4xl': '2.25rem',   // 36px
-    '5xl': '3rem',      // 48px
-  },
-  
-  // 아이콘 크기
-  iconSizes: {
-    xs: '12px',
-    sm: '16px',
-    md: '20px',
-    lg: '24px',
-    xl: '32px',
-    '2xl': '40px',
-  },
-  
-  // 브레이크포인트
-  breakpoints: {
-    xs: '375px',
-    sm: '640px',
-    md: '768px',
-    lg: '1024px',
-    xl: '1280px',
-    '2xl': '1536px',
-    '3xl': '1920px',
+    xs: '0.75rem',
+    sm: '0.8125rem',
+    base: '0.9375rem',
+    lg: '1.0625rem',
+    xl: '1.25rem',
+    '2xl': '1.5rem',
+    '3xl': '1.875rem',
+    '4xl': '2.25rem',
   },
 };
 
 export default designTokens;
-

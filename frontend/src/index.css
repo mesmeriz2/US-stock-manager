@@ -1,107 +1,89 @@
-/* 한글 폰트 최적화 */
+/* Obsidian Finance Design System */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  /* 기본 폰트 크기 설정 */
   html {
     font-size: 16px;
   }
-  
+
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 40 20% 97%;
+    --foreground: 230 25% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 230 25% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
-    
-    /* 금융 데이터 전용 색상 */
-    --profit: 142.1 76.2% 36.3%;        /* 수익 (녹색) */
-    --profit-light: 142.1 70.6% 45.3%;
-    --profit-dark: 142.1 82% 28%;
-    
-    --loss: 0 84.2% 60.2%;              /* 손실 (빨강) */
-    --loss-light: 0 72.2% 70%;
-    --loss-dark: 0 92% 50%;
-    
-    --neutral: 215 20.2% 65.1%;         /* 중립 (회색) */
-    --warning: 38.7 92% 50%;            /* 경고 (주황) */
-    
-    /* 그라데이션 색상 변수 */
-    --gradient-primary-from: 221.2 83.2% 53.3%;
-    --gradient-primary-to: 217.2 91.2% 59.8%;
-    --gradient-success-from: 142.1 76.2% 36.3%;
-    --gradient-success-to: 142.1 70.6% 45.3%;
-    --gradient-danger-from: 0 84.2% 60.2%;
-    --gradient-danger-to: 0 72.2% 50.2%;
-    --gradient-info-from: 199.1 89.1% 48.2%;
-    --gradient-info-to: 199.1 89.1% 58.2%;
-    --gradient-warning-from: 38.7 92% 50%;
-    --gradient-warning-to: 38.7 92% 60%;
+    --popover-foreground: 230 25% 12%;
+    --primary: 40 60% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 230 15% 93%;
+    --secondary-foreground: 230 25% 18%;
+    --muted: 35 15% 93%;
+    --muted-foreground: 230 12% 50%;
+    --accent: 35 25% 90%;
+    --accent-foreground: 230 25% 15%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 35 18% 86%;
+    --input: 35 18% 86%;
+    --ring: 40 60% 45%;
+    --radius: 0.75rem;
+
+    --profit: 160 70% 38%;
+    --profit-light: 160 60% 48%;
+    --profit-dark: 160 80% 30%;
+    --loss: 0 75% 58%;
+    --loss-light: 0 65% 68%;
+    --loss-dark: 0 85% 48%;
+    --neutral: 230 12% 55%;
+    --warning: 38 92% 50%;
+
+    --surface-glass: rgba(255, 255, 255, 0.7);
+    --surface-glass-border: rgba(0, 0, 0, 0.06);
+    --noise-opacity: 0.03;
+
+    --sidebar-width: 72px;
+    --sidebar-expanded: 240px;
+    --topbar-height: 64px;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 70%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
-    
-    /* 금융 데이터 전용 색상 (다크모드) */
-    --profit: 142.1 70.6% 45.3%;
-    --profit-light: 142.1 76.2% 55%;
-    --profit-dark: 142.1 82% 38%;
-    
-    --loss: 0 72.2% 50.2%;
-    --loss-light: 0 84.2% 60%;
-    --loss-dark: 0 92% 45%;
-    
-    --neutral: 215 20.2% 70%;
-    
-    /* 다크모드 그라데이션 색상 변수 */
-    --gradient-primary-from: 217.2 91.2% 59.8%;
-    --gradient-primary-to: 221.2 83.2% 63.3%;
-    --gradient-success-from: 142.1 70.6% 45.3%;
-    --gradient-success-to: 142.1 76.2% 50.3%;
-    --gradient-danger-from: 0 72.2% 50.2%;
-    --gradient-danger-to: 0 84.2% 60.2%;
-    --gradient-info-from: 199.1 89.1% 58.2%;
-    --gradient-info-to: 199.1 89.1% 68.2%;
-    --gradient-warning-from: 38.7 92% 60%;
-    --gradient-warning-to: 38.7 92% 70%;
+    --background: 228 40% 6%;
+    --foreground: 220 20% 92%;
+    --card: 228 35% 10%;
+    --card-foreground: 220 20% 92%;
+    --popover: 228 35% 10%;
+    --popover-foreground: 220 20% 92%;
+    --primary: 40 65% 55%;
+    --primary-foreground: 228 40% 6%;
+    --secondary: 228 30% 16%;
+    --secondary-foreground: 220 20% 90%;
+    --muted: 228 30% 16%;
+    --muted-foreground: 220 15% 58%;
+    --accent: 228 25% 18%;
+    --accent-foreground: 220 20% 90%;
+    --destructive: 0 62% 40%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 228 25% 18%;
+    --input: 228 25% 18%;
+    --ring: 40 65% 55%;
+
+    --profit: 160 65% 50%;
+    --profit-light: 160 55% 60%;
+    --profit-dark: 160 75% 42%;
+    --loss: 0 72% 60%;
+    --loss-light: 0 62% 70%;
+    --loss-dark: 0 82% 50%;
+    --neutral: 220 15% 58%;
+
+    --surface-glass: rgba(22, 27, 46, 0.75);
+    --surface-glass-border: rgba(255, 255, 255, 0.06);
+    --noise-opacity: 0.04;
   }
 }
 
@@ -109,322 +91,227 @@
   * {
     @apply border-border;
   }
-  
+
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Noto Sans KR', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Outfit', 'Noto Sans KR', -apple-system, sans-serif;
   }
-  
-  /* 타이포그래피 스케일 */
-  .text-display {
-    @apply text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight;
-  }
-  
-  .text-headline {
-    @apply text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight;
-  }
-  
-  .text-title {
-    @apply text-xl sm:text-2xl lg:text-3xl font-semibold;
-  }
-  
-  .text-body-lg {
-    @apply text-base sm:text-lg leading-relaxed;
-  }
-  
-  .text-body {
-    @apply text-sm sm:text-base leading-normal;
-  }
-  
-  .text-body-sm {
-    @apply text-xs sm:text-sm leading-normal;
-  }
-  
-  .text-caption {
-    @apply text-xs leading-tight;
-  }
-  
-  /* 숫자 전용 폰트 (금융 데이터에 최적) */
+
   .font-numeric {
-    font-family: 'Inter', 'Roboto', system-ui, sans-serif;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
     font-variant-numeric: tabular-nums;
     font-feature-settings: 'tnum';
   }
-  
-  /* select 요소 전역 스타일 */
+
   select {
     @apply bg-background;
   }
-  
-  /* 포커스 스타일 개선 (버튼과 인터랙티브 요소에만 적용) */
+
   button:focus-visible,
   a:focus-visible,
   input:focus-visible,
   select:focus-visible,
   textarea:focus-visible {
-    @apply outline-none ring-2 ring-ring ring-offset-2;
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.25);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.4);
   }
 }
 
 @layer utilities {
-  /* 금융 데이터 표시용 유틸리티 */
-  .text-profit {
-    color: hsl(var(--profit));
-  }
-  
-  .text-profit-light {
-    color: hsl(var(--profit-light));
-  }
-  
-  .text-loss {
-    color: hsl(var(--loss));
-  }
-  
-  .text-loss-light {
-    color: hsl(var(--loss-light));
-  }
-  
-  .text-neutral {
-    color: hsl(var(--neutral));
-  }
-  
-  .bg-profit {
-    background-color: hsl(var(--profit));
-  }
-  
-  .bg-loss {
-    background-color: hsl(var(--loss));
-  }
-  
-  /* 숫자 표시 유틸리티 */
-  .number-positive {
-    @apply text-profit font-semibold font-numeric;
-  }
-  
-  .number-negative {
-    @apply text-loss font-semibold font-numeric;
-  }
-  
-  .number-neutral {
-    @apply text-neutral font-numeric;
-  }
-  
-  /* 스크롤바 숨기기 (스크롤 기능은 유지) */
+  .text-profit { color: hsl(var(--profit)); }
+  .text-profit-light { color: hsl(var(--profit-light)); }
+  .text-loss { color: hsl(var(--loss)); }
+  .text-loss-light { color: hsl(var(--loss-light)); }
+  .text-neutral { color: hsl(var(--neutral)); }
+  .bg-profit { background-color: hsl(var(--profit)); }
+  .bg-loss { background-color: hsl(var(--loss)); }
+
+  .number-positive { @apply text-profit font-semibold font-numeric; }
+  .number-negative { @apply text-loss font-semibold font-numeric; }
+  .number-neutral { @apply text-neutral font-numeric; }
+
   .scrollbar-hide {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
   .scrollbar-hide::-webkit-scrollbar {
-    display: none;  /* Chrome, Safari, Opera */
+    display: none;
   }
-  
-  /* 그라데이션 유틸리티 */
-  .gradient-primary {
-    background: linear-gradient(135deg, hsl(var(--gradient-primary-from)), hsl(var(--gradient-primary-to)));
+
+  /* Glass morphism */
+  .glass {
+    background: var(--surface-glass);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid var(--surface-glass-border);
   }
-  
-  .gradient-success {
-    background: linear-gradient(135deg, hsl(var(--gradient-success-from)), hsl(var(--gradient-success-to)));
+
+  .glass-subtle {
+    background: var(--surface-glass);
+    backdrop-filter: blur(8px) saturate(150%);
+    -webkit-backdrop-filter: blur(8px) saturate(150%);
+    border: 1px solid var(--surface-glass-border);
   }
-  
-  .gradient-danger {
-    background: linear-gradient(135deg, hsl(var(--gradient-danger-from)), hsl(var(--gradient-danger-to)));
+
+  /* Noise texture overlay */
+  .noise::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: var(--noise-opacity);
+    pointer-events: none;
+    border-radius: inherit;
   }
-  
-  .gradient-info {
-    background: linear-gradient(135deg, hsl(var(--gradient-info-from)), hsl(var(--gradient-info-to)));
+
+  /* Gold gradient accent */
+  .gold-gradient {
+    background: linear-gradient(135deg, hsl(35 80% 55%), hsl(45 90% 60%), hsl(35 80% 55%));
   }
-  
-  .gradient-warning {
-    background: linear-gradient(135deg, hsl(var(--gradient-warning-from)), hsl(var(--gradient-warning-to)));
-  }
-  
-  /* 텍스트 그라데이션 */
-  .text-gradient-primary {
-    background: linear-gradient(135deg, hsl(var(--gradient-primary-from)), hsl(var(--gradient-primary-to)));
+
+  .text-gold {
+    background: linear-gradient(135deg, hsl(35 80% 55%), hsl(45 90% 65%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  
-  .text-gradient-success {
-    background: linear-gradient(135deg, hsl(var(--gradient-success-from)), hsl(var(--gradient-success-to)));
+
+  .dark .text-gold {
+    background: linear-gradient(135deg, hsl(40 75% 60%), hsl(45 85% 70%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  
-  /* 향상된 그림자 */
-  .shadow-elevation-1 {
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+
+  /* Accent bar */
+  .accent-bar-left {
+    position: relative;
   }
-  
-  .shadow-elevation-2 {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  .accent-bar-left::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: hsl(var(--primary));
+    opacity: 0;
+    transition: opacity 0.2s ease;
   }
-  
-  .shadow-elevation-3 {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  .accent-bar-left:hover::before {
+    opacity: 1;
   }
-  
-  .shadow-elevation-4 {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Shadows */
+  .shadow-obsidian {
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.05),
+      0 4px 12px rgba(0, 0, 0, 0.08);
   }
-  
-  .shadow-elevation-5 {
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  .dark .shadow-obsidian {
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.2),
+      0 4px 12px rgba(0, 0, 0, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03);
   }
-  
-  .dark .shadow-elevation-1 {
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+
+  .shadow-glow-gold {
+    box-shadow: 0 0 20px rgba(212, 168, 83, 0.15);
   }
-  
-  .dark .shadow-elevation-2 {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+
+  .dark .shadow-glow-gold {
+    box-shadow: 0 0 24px rgba(212, 168, 83, 0.2);
   }
-  
-  .dark .shadow-elevation-3 {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
-  }
-  
-  .dark .shadow-elevation-4 {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
-  }
-  
-  .dark .shadow-elevation-5 {
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  }
-  
-  /* 애니메이션 */
+
+  /* Animations */
   @keyframes fade-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
-  
+
   @keyframes slide-up {
-    from {
-      transform: translateY(10px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
+    from { transform: translateY(12px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
   }
-  
-  @keyframes slide-down {
-    from {
-      transform: translateY(-10px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
+
+  @keyframes slide-in-right {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
   }
-  
+
+  @keyframes slide-out-right {
+    from { transform: translateX(0); }
+    to { transform: translateX(100%); }
+  }
+
   @keyframes scale-in {
-    from {
-      transform: scale(0.95);
-      opacity: 0;
-    }
-    to {
-      transform: scale(1);
-      opacity: 1;
-    }
+    from { transform: scale(0.96); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
   }
-  
+
   @keyframes shimmer {
-    0% {
-      background-position: -1000px 0;
-    }
-    100% {
-      background-position: 1000px 0;
-    }
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
   }
-  
-  @keyframes pulse-glow {
-    0%, 100% {
-      opacity: 1;
-      box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
-    }
-    50% {
-      opacity: 0.8;
-      box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
-    }
+
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
   }
-  
-  .animate-fade-in {
-    animation: fade-in 0.3s ease-out;
+
+  @keyframes count-up {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
   }
-  
-  .animate-slide-up {
-    animation: slide-up 0.3s ease-out;
-  }
-  
-  .animate-slide-down {
-    animation: slide-down 0.3s ease-out;
-  }
-  
-  .animate-scale-in {
-    animation: scale-in 0.2s ease-out;
-  }
-  
+
+  .animate-fade-in { animation: fade-in 0.3s ease-out; }
+  .animate-slide-up { animation: slide-up 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+  .animate-slide-in-right { animation: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+  .animate-slide-out-right { animation: slide-out-right 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+  .animate-scale-in { animation: scale-in 0.2s ease-out; }
   .animate-shimmer {
     animation: shimmer 2s infinite linear;
-    background: linear-gradient(
-      to right,
-      transparent 0%,
-      rgba(255, 255, 255, 0.1) 50%,
-      transparent 100%
-    );
+    background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
     background-size: 1000px 100%;
   }
-  
-  .animate-pulse-glow {
-    animation: pulse-glow 2s ease-in-out infinite;
-  }
-  
-  /* 호버 효과 */
+  .animate-pulse-soft { animation: pulse-soft 2s ease-in-out infinite; }
+  .animate-count-up { animation: count-up 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+
+  /* Stagger delays */
+  .stagger-1 { animation-delay: 0.05s; animation-fill-mode: backwards; }
+  .stagger-2 { animation-delay: 0.1s; animation-fill-mode: backwards; }
+  .stagger-3 { animation-delay: 0.15s; animation-fill-mode: backwards; }
+  .stagger-4 { animation-delay: 0.2s; animation-fill-mode: backwards; }
+  .stagger-5 { animation-delay: 0.25s; animation-fill-mode: backwards; }
+
+  /* Hover effects */
   .hover-lift {
-    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
-  
   .hover-lift:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
-  
-  .dark .hover-lift:hover {
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
-  }
-  
+
   .hover-glow {
-    transition: box-shadow 0.3s ease-out;
+    transition: box-shadow 0.3s ease;
   }
-  
   .hover-glow:hover {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
-  }
-  
-  /* 부드러운 전환 */
-  .transition-smooth {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .transition-bounce {
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 0 24px rgba(212, 168, 83, 0.2);
   }
 }
-
-
-
-
-
-
-
-

@@ -8,9 +8,6 @@ interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
   animation?: 'pulse' | 'wave' | 'none';
 }
 
-/**
- * 스켈레톤 로딩 컴포넌트
- */
 export function Skeleton({
   variant = 'rectangular',
   width,
@@ -22,13 +19,13 @@ export function Skeleton({
   return (
     <div
       className={cn(
-        'bg-muted',
+        'bg-muted/60',
         animation === 'pulse' && 'animate-pulse',
         animation === 'wave' && 'animate-shimmer',
         variant === 'text' && 'h-4 rounded',
         variant === 'circular' && 'rounded-full',
-        variant === 'rectangular' && 'rounded-md',
-        variant === 'card' && 'rounded-lg',
+        variant === 'rectangular' && 'rounded-lg',
+        variant === 'card' && 'rounded-xl',
         className
       )}
       style={{ width, height }}
@@ -37,32 +34,24 @@ export function Skeleton({
   );
 }
 
-/**
- * 금융 카드 스켈레톤
- */
 export function FinancialCardSkeleton() {
   return (
-    <div className="rounded-lg border bg-card text-card-foreground shadow-elevation-2 min-h-[140px] sm:min-h-[120px]">
-      <div className="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
-        <Skeleton variant="text" width="60%" />
-        <Skeleton variant="circular" width={32} height={32} />
+    <div className="rounded-xl border border-border/60 bg-card shadow-obsidian p-5 space-y-3">
+      <div className="flex items-center justify-between">
+        <Skeleton variant="text" width="50%" />
+        <Skeleton variant="circular" width={28} height={28} />
       </div>
-      <div className="p-6 pt-0">
-        <Skeleton variant="text" width="80%" height={32} className="mb-2" />
-        <Skeleton variant="text" width="60%" />
-      </div>
+      <Skeleton variant="text" width="70%" height={28} />
+      <Skeleton variant="text" width="45%" />
     </div>
   );
 }
 
-/**
- * 테이블 로우 스켈레톤
- */
 export function TableRowSkeleton({ columns = 5 }: { columns?: number }) {
   return (
-    <tr className="border-b">
+    <tr className="border-b border-border/40">
       {Array.from({ length: columns }).map((_, i) => (
-        <td key={i} className="p-4">
+        <td key={i} className="p-3">
           <Skeleton variant="text" />
         </td>
       ))}
@@ -70,17 +59,14 @@ export function TableRowSkeleton({ columns = 5 }: { columns?: number }) {
   );
 }
 
-/**
- * 테이블 스켈레톤
- */
 export function TableSkeleton({ rows = 5, columns = 5 }: { rows?: number; columns?: number }) {
   return (
     <div className="w-full">
       <table className="w-full">
         <thead>
-          <tr className="border-b-2">
+          <tr className="border-b">
             {Array.from({ length: columns }).map((_, i) => (
-              <th key={i} className="p-4">
+              <th key={i} className="p-3">
                 <Skeleton variant="text" />
               </th>
             ))}
@@ -96,50 +82,22 @@ export function TableSkeleton({ rows = 5, columns = 5 }: { rows?: number; column
   );
 }
 
-/**
- * 리스트 아이템 스켈레톤
- */
-export function ListItemSkeleton() {
-  return (
-    <div className="flex items-center space-x-4 p-4">
-      <Skeleton variant="circular" width={40} height={40} />
-      <div className="flex-1 space-y-2">
-        <Skeleton variant="text" width="60%" />
-        <Skeleton variant="text" width="40%" />
-      </div>
-    </div>
-  );
-}
-
-/**
- * 대시보드 카드 그리드 스켈레톤
- */
 export function DashboardSkeleton() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <Skeleton variant="text" width="200px" height={40} />
-        <Skeleton variant="rectangular" width="120px" height={36} />
+        <Skeleton variant="text" width="180px" height={36} />
+        <Skeleton variant="rectangular" width="100px" height={32} />
       </div>
-      
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        {Array.from({ length: 5 }).map((_, i) => (
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
           <FinancialCardSkeleton key={i} />
         ))}
       </div>
-      
-      <div className="rounded-lg border bg-card shadow-elevation-2 p-6">
-        <Skeleton variant="text" width="150px" height={28} className="mb-4" />
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="space-y-2">
-              <Skeleton variant="text" width="80%" />
-              <Skeleton variant="text" width="60%" height={32} />
-            </div>
-          ))}
-        </div>
+      <div className="rounded-xl border border-border/60 bg-card shadow-obsidian p-5">
+        <Skeleton variant="text" width="120px" height={24} className="mb-4" />
+        <Skeleton variant="rectangular" width="100%" height={280} />
       </div>
     </div>
   );
 }
-

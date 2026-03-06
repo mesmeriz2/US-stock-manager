@@ -16,52 +16,27 @@ export default {
       },
     },
     extend: {
-      // 반응형 브레이크포인트 확장
       screens: {
-        'xs': '375px',   // 소형 모바일
-        'sm': '640px',
-        'md': '768px',
-        'lg': '1024px',
-        'xl': '1280px',
-        '2xl': '1536px',
-        '3xl': '1920px', // 대형 데스크탑
+        'xs': '375px',
+        '3xl': '1920px',
       },
-      
-      // 폰트 패밀리
       fontFamily: {
-        sans: ['Noto Sans KR', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
-        numeric: ['Inter', 'Roboto', 'system-ui', 'sans-serif'],
+        sans: ['Outfit', 'Noto Sans KR', '-apple-system', 'sans-serif'],
+        display: ['Outfit', 'Noto Sans KR', 'sans-serif'],
+        numeric: ['JetBrains Mono', 'Fira Code', 'monospace'],
+        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
       },
-      
-      // 폰트 크기 (line-height 포함)
       fontSize: {
-        'xs': ['0.75rem', { lineHeight: '1rem' }],      // 12px
-        'sm': ['0.875rem', { lineHeight: '1.25rem' }],  // 14px
-        'base': ['1rem', { lineHeight: '1.5rem' }],     // 16px
-        'lg': ['1.125rem', { lineHeight: '1.75rem' }],  // 18px
-        'xl': ['1.25rem', { lineHeight: '1.875rem' }],  // 20px
-        '2xl': ['1.5rem', { lineHeight: '2rem' }],      // 24px
-        '3xl': ['1.875rem', { lineHeight: '2.25rem' }], // 30px
-        '4xl': ['2.25rem', { lineHeight: '2.5rem' }],   // 36px
-        '5xl': ['3rem', { lineHeight: '1' }],           // 48px
+        'xs': ['0.75rem', { lineHeight: '1rem' }],
+        'sm': ['0.8125rem', { lineHeight: '1.25rem' }],
+        'base': ['0.9375rem', { lineHeight: '1.5rem' }],
+        'lg': ['1.0625rem', { lineHeight: '1.75rem' }],
+        'xl': ['1.25rem', { lineHeight: '1.75rem' }],
+        '2xl': ['1.5rem', { lineHeight: '2rem' }],
+        '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
+        '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
+        '5xl': ['3rem', { lineHeight: '1' }],
       },
-      
-      // 간격 확장
-      spacing: {
-        'safe': '0.875rem',           // 14px - 안전한 최소 간격
-        'touch': '2.75rem',            // 44px - 터치 타겟 크기
-        'mobile-padding': '1rem',      // 16px - 모바일 패딩
-        'desktop-padding': '2rem',     // 32px - 데스크탑 패딩
-      },
-      
-      // 최소 너비/높이
-      minWidth: {
-        'touch': '44px',  // WCAG 터치 타겟
-      },
-      minHeight: {
-        'touch': '44px',  // WCAG 터치 타겟
-      },
-      
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -96,7 +71,6 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // 금융 데이터 전용 색상
         profit: {
           DEFAULT: "hsl(var(--profit))",
           light: "hsl(var(--profit-light))",
@@ -109,11 +83,23 @@ export default {
         },
         neutral: "hsl(var(--neutral))",
         warning: "hsl(var(--warning))",
+        gold: {
+          DEFAULT: "hsl(40, 65%, 55%)",
+          light: "hsl(45, 85%, 70%)",
+          dark: "hsl(35, 80%, 45%)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        xl: "calc(var(--radius) + 4px)",
+        '2xl': "calc(var(--radius) + 8px)",
+      },
+      spacing: {
+        'sidebar': 'var(--sidebar-width)',
+        'sidebar-expanded': 'var(--sidebar-expanded)',
+        'topbar': 'var(--topbar-height)',
       },
       keyframes: {
         "accordion-down": {
@@ -133,11 +119,3 @@ export default {
   },
   plugins: [require("tailwindcss-animate")],
 }
-
-
-
-
-
-
-
-
