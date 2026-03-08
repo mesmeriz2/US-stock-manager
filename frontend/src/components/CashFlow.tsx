@@ -827,8 +827,8 @@ export default function CashFlow({ accountId }: CashFlowProps) {
                               {item.ticker && (
                                 <span className="text-xs font-semibold text-primary">{item.ticker}</span>
                               )}
-                              {item.note && (
-                                <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                              {item.note && item.sourceType !== 'dividend' && (
+                                <span className="text-xs text-muted-foreground">
                                   {item.note}
                                 </span>
                               )}

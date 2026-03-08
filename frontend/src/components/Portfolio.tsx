@@ -865,7 +865,7 @@ export default function Portfolio({ accountId }: PortfolioProps) {
           {analysis && (
             <div className={cn('inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-semibold', scoreColor(analysis.diversification_score))}>
               <Award className="h-3.5 w-3.5" />
-              분산투자 점수 {analysis.diversification_score}
+              분산투자 점수 {analysis.diversification_score.toFixed(1)}
             </div>
           )}
         </div>

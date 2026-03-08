@@ -369,95 +369,65 @@ export default function PositionsTable({ accountId }: PositionsTableProps) {
                     <ArrowUpDown className={`h-3 w-3 transition-transform ${sortField === 'ticker' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
                   </button>
                 </TableHead>
-                <TableHead className="text-right min-w-[85px] py-2 px-2">
-                  <button
-                    onClick={() => handleSort('shares')}
-                    className="flex items-center gap-1 ml-auto hover:text-foreground transition-colors group"
-                  >
-                    보유수량
+                <TableHead className="text-right min-w-[85px] py-2 px-2 cursor-pointer hover:text-foreground transition-colors group" onClick={() => handleSort('shares')}>
+                  <span className="inline-flex items-center gap-1">
                     <ArrowUpDown className={`h-3 w-3 transition-transform ${sortField === 'shares' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
-                  </button>
+                    보유수량
+                  </span>
                 </TableHead>
-                <TableHead className="text-right min-w-[85px] py-2 px-2 hidden sm:table-cell">
-                  <button
-                    onClick={() => handleSort('holding_days')}
-                    className="flex items-center gap-1 ml-auto hover:text-foreground transition-colors group"
-                  >
-                    보유기간
+                <TableHead className="text-right min-w-[85px] py-2 px-2 hidden sm:table-cell cursor-pointer hover:text-foreground transition-colors group" onClick={() => handleSort('holding_days')}>
+                  <span className="inline-flex items-center gap-1">
                     <ArrowUpDown className={`h-3 w-3 transition-transform ${sortField === 'holding_days' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
-                  </button>
+                    보유기간
+                  </span>
                 </TableHead>
-                <TableHead className="text-right min-w-[85px] py-2 px-2 hidden sm:table-cell">
-                  <button
-                    onClick={() => handleSort('avg_cost_usd')}
-                    className="flex items-center gap-1 ml-auto hover:text-foreground transition-colors group"
-                  >
-                    평단가
+                <TableHead className="text-right min-w-[85px] py-2 px-2 hidden sm:table-cell cursor-pointer hover:text-foreground transition-colors group" onClick={() => handleSort('avg_cost_usd')}>
+                  <span className="inline-flex items-center gap-1">
                     <ArrowUpDown className={`h-3 w-3 transition-transform ${sortField === 'avg_cost_usd' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
-                  </button>
+                    평단가
+                  </span>
                 </TableHead>
-                <TableHead className="text-right min-w-[85px] py-2 px-2">
-                  <button
-                    onClick={() => handleSort('market_price_usd')}
-                    className="flex items-center gap-1 ml-auto hover:text-foreground transition-colors group"
-                  >
-                    현재가
+                <TableHead className="text-right min-w-[85px] py-2 px-2 cursor-pointer hover:text-foreground transition-colors group" onClick={() => handleSort('market_price_usd')}>
+                  <span className="inline-flex items-center gap-1">
                     <ArrowUpDown className={`h-3 w-3 transition-transform ${sortField === 'market_price_usd' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
-                  </button>
+                    현재가
+                  </span>
                 </TableHead>
-                <TableHead className="text-right min-w-[100px] py-2 px-2 hidden md:table-cell">
-                  <button
-                    onClick={() => handleSort('market_value_usd')}
-                    className="flex items-center gap-1 ml-auto hover:text-foreground transition-colors group"
-                  >
-                    평가금액
+                <TableHead className="text-right min-w-[100px] py-2 px-2 hidden md:table-cell cursor-pointer hover:text-foreground transition-colors group" onClick={() => handleSort('market_value_usd')}>
+                  <span className="inline-flex items-center gap-1">
                     <ArrowUpDown className={`h-3 w-3 transition-transform ${sortField === 'market_value_usd' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
-                  </button>
+                    평가금액
+                  </span>
                 </TableHead>
-                <TableHead className="text-right min-w-[90px] py-2 px-2 hidden xl:table-cell">
-                  <button
-                    onClick={() => handleSort('day_change_pl_usd')}
-                    className="flex items-center gap-1 ml-auto hover:text-foreground transition-colors group"
-                  >
-                    전일대비($)
+                <TableHead className="text-right min-w-[90px] py-2 px-2 hidden xl:table-cell cursor-pointer hover:text-foreground transition-colors group" onClick={() => handleSort('day_change_pl_usd')}>
+                  <span className="inline-flex items-center gap-1">
                     <ArrowUpDown className={`h-3 w-3 transition-transform ${sortField === 'day_change_pl_usd' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
-                  </button>
+                    전일대비($)
+                  </span>
                 </TableHead>
-                <TableHead className="text-right min-w-[80px] py-2 px-2 hidden lg:table-cell">
-                  <button
-                    onClick={() => handleSort('day_change_pl_percent')}
-                    className="flex items-center gap-1 ml-auto hover:text-foreground transition-colors group"
-                  >
-                    전일대비(%)
+                <TableHead className="text-right min-w-[80px] py-2 px-2 hidden lg:table-cell cursor-pointer hover:text-foreground transition-colors group" onClick={() => handleSort('day_change_pl_percent')}>
+                  <span className="inline-flex items-center gap-1">
                     <ArrowUpDown className={`h-3 w-3 transition-transform ${sortField === 'day_change_pl_percent' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
-                  </button>
+                    전일대비(%)
+                  </span>
                 </TableHead>
-                <TableHead className="text-right min-w-[100px] py-2 px-2 hidden xl:table-cell">
-                  <button
-                    onClick={() => handleSort('realized_pl_usd')}
-                    className="flex items-center gap-1 ml-auto hover:text-foreground transition-colors group"
-                  >
-                    실현손익
+                <TableHead className="text-right min-w-[100px] py-2 px-2 hidden xl:table-cell cursor-pointer hover:text-foreground transition-colors group" onClick={() => handleSort('realized_pl_usd')}>
+                  <span className="inline-flex items-center gap-1">
                     <ArrowUpDown className={`h-3 w-3 transition-transform ${sortField === 'realized_pl_usd' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
-                  </button>
+                    실현손익
+                  </span>
                 </TableHead>
-                <TableHead className="text-right min-w-[100px] py-2 px-2 hidden lg:table-cell">
-                  <button
-                    onClick={() => handleSort('unrealized_pl_usd')}
-                    className="flex items-center gap-1 ml-auto hover:text-foreground transition-colors group"
-                  >
-                    미실현손익
+                <TableHead className="text-right min-w-[100px] py-2 px-2 hidden lg:table-cell cursor-pointer hover:text-foreground transition-colors group" onClick={() => handleSort('unrealized_pl_usd')}>
+                  <span className="inline-flex items-center gap-1">
                     <ArrowUpDown className={`h-3 w-3 transition-transform ${sortField === 'unrealized_pl_usd' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
-                  </button>
+                    미실현손익
+                  </span>
                 </TableHead>
-                <TableHead className="text-right min-w-[85px] py-2 px-2">
-                  <button
-                    onClick={() => handleSort('unrealized_pl_percent')}
-                    className="flex items-center gap-1 ml-auto hover:text-foreground transition-colors group"
-                  >
-                    수익률
+                <TableHead className="text-right min-w-[85px] py-2 px-2 cursor-pointer hover:text-foreground transition-colors group" onClick={() => handleSort('unrealized_pl_percent')}>
+                  <span className="inline-flex items-center gap-1">
                     <ArrowUpDown className={`h-3 w-3 transition-transform ${sortField === 'unrealized_pl_percent' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
-                  </button>
+                    수익률
+                  </span>
                 </TableHead>
               </TableRow>
             </TableHeader>

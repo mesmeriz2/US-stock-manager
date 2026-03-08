@@ -23,8 +23,8 @@ export default {
       fontFamily: {
         sans: ['Outfit', 'Noto Sans KR', '-apple-system', 'sans-serif'],
         display: ['Outfit', 'Noto Sans KR', 'sans-serif'],
-        numeric: ['JetBrains Mono', 'Fira Code', 'monospace'],
-        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+        numeric: ['JetBrains Mono', 'Fira Code', 'Noto Sans KR', 'monospace'],
+        mono: ['JetBrains Mono', 'Fira Code', 'Noto Sans KR', 'monospace'],
       },
       fontSize: {
         'xs': ['0.75rem', { lineHeight: '1rem' }],

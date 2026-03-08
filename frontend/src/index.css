@@ -98,7 +98,7 @@
   }
 
   .font-numeric {
-    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Noto Sans KR', monospace;
     font-variant-numeric: tabular-nums;
     font-feature-settings: 'tnum';
   }
